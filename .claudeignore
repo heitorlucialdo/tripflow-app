@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+.env
+.env.*
+*.local
+package-lock.json
+app/dist/
+app/public/imgs/
+backend/src/generated/

@@ -1,0 +1,278 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #060c17;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.topoBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  pointer-events: none;
+}
+
+.topoBg svg {
+  width: 100%;
+  height: 100%;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-align: center;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+/* Google button */
+.googleBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0.8rem 1rem;
+  background: #0f2040;
+  border: 1px solid rgba(79, 195, 247, 0.2);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.googleBtn:hover {
+  border-color: rgba(79, 195, 247, 0.6);
+}
+
+/* Divider */
+.divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #a0b4c8;
+  font-size: 0.8rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Form */
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.inputCard {
+  width: 100%;
+  background: #0f2040;
+  border: 1px solid rgba(79, 195, 247, 0.2);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.inputCard:focus-within {
+  border-color: rgba(79, 195, 247, 0.6);
+}
+
+.inputCardError {
+  border-color: rgba(248, 113, 113, 0.6);
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.inputDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  margin: 0 1rem;
+}
+
+.input {
+  flex: 1;
+  padding: 0.85rem 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.input::placeholder {
+  color: #a0b4c8;
+}
+
+.eyeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Forgot */
+.forgotRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.forgotBtn {
+  background: none;
+  border: none;
+  color: #4fc3f7;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Submit */
+.submitBtn {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #1565c0, #4fc3f7);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: scale(1.01);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  font-size: 0.82rem;
+  color: #f87171;
+  text-align: center;
+  margin: 0;
+}
+
+/* Footer */
+.footer {
+  font-size: 0.85rem;
+  color: #a0b4c8;
+  margin: 0;
+  text-align: center;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  color: #4fc3f7;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Modal esqueceu a senha */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1.5rem;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  width: 100%;
+  max-width: 380px;
+  background: #0f2040;
+  border: 1px solid rgba(79, 195, 247, 0.25);
+  border-radius: 20px;
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modalTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  text-align: center;
+}
+
+.modalDesc {
+  font-size: 0.85rem;
+  color: #a0b4c8;
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  color: #a0b4c8;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+  padding: 0.25rem;
+}
+
+.modalClose:hover { color: #ffffff; }
+
+.info {
+  font-size: 0.82rem;
+  color: #4ade80;
+  text-align: center;
+  margin: 0;
+}

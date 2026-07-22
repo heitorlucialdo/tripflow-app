@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viagem dos Amigos — Rio de Janeiro 2025</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#FFD700;--blue:#0077B6;--dark:#0a0a0a;--card-bg:#1a1a2e;--text:#f0f0f0;--muted:#aaa}
+html{scroll-behavior:smooth}
+body{background:var(--dark);color:var(--text);font-family:'Poppins',sans-serif;overflow-x:hidden}
+
+/* HERO */
+#hero{min-height:100vh;background:radial-gradient(ellipse at 60% 40%,#0a1628 0%,#000 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:2rem}
+#hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,215,0,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,12vw,10rem);line-height:.9;text-align:center;background:linear-gradient(135deg,#fff 30%,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;z-index:2}
+.hero-sub{font-size:clamp(.9rem,2vw,1.3rem);color:var(--gold);letter-spacing:6px;text-transform:uppercase;margin-top:.8rem;z-index:2;text-align:center}
+#plane-scene{width:min(700px,95vw);height:160px;position:relative;margin:2.5rem auto 1rem;z-index:2}
+#plane-path-svg{position:absolute;inset:0;width:100%;height:100%}
+#plane-icon{position:absolute;width:48px;height:48px;top:0;left:0;filter:drop-shadow(0 0 8px var(--gold));animation:flyPlane 3s ease-in-out forwards}
+@keyframes flyPlane{0%{left:2%;top:120px;transform:rotate(-20deg);opacity:0}10%{opacity:1}50%{left:50%;top:20px;transform:rotate(5deg)}90%{opacity:1}100%{left:93%;top:100px;transform:rotate(15deg);opacity:.8}}
+.city-label{position:absolute;bottom:0;font-size:.75rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.city-label.left{left:0}.city-label.right{right:0}
+.hero-dates{z-index:2;font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,4vw,2.2rem);color:var(--blue);letter-spacing:4px;margin-top:.5rem}
+.scroll-arrow{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);z-index:2;animation:pulse 1.5s infinite;cursor:pointer;color:var(--gold);font-size:2rem;background:none;border:none}
+@keyframes pulse{0%,100%{opacity:.4;transform:translateX(-50%) translateY(0)}50%{opacity:1;transform:translateX(-50%) translateY(8px)}}
+
+/* ITINERARY */
+#itinerary{padding:4rem 1rem;max-width:1200px;margin:auto}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,6vw,4rem);text-align:center;color:var(--gold);letter-spacing:3px;margin-bottom:3rem}
+.day-block{margin-bottom:4rem;opacity:0;transform:translateY(40px);transition:opacity .6s ease,transform .6s ease}
+.day-block.visible{opacity:1;transform:none}
+.day-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:.8rem;border-bottom:2px solid var(--blue)}
+.day-block:nth-child(odd) .day-header{border-color:var(--gold)}
+.day-num{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:var(--blue);line-height:1;min-width:60px}
+.day-block:nth-child(odd) .day-num{color:var(--gold)}
+.day-info-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.3rem,3vw,2rem);letter-spacing:1px}
+.day-info-sub{color:var(--muted);font-size:.85rem;margin-top:.2rem}
+.places-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.2rem}
+.day-msg{color:var(--muted);font-size:.9rem;padding:.5rem 1rem}
+
+/* CARDS */
+.place-card{border-radius:12px;overflow:hidden;background:var(--card-bg);cursor:pointer;transition:transform .25s,box-shadow .25s;position:relative}
+.place-card:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 12px 32px rgba(0,119,182,.4)}
+.place-img{width:100%;height:160px;object-fit:cover;display:block}
+.place-img-placeholder{width:100%;height:160px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:rgba(255,255,255,.6);text-align:center;padding:.5rem;font-weight:600}
+.place-name{padding:.8rem 1rem;font-size:.9rem;font-weight:600;color:#fff;line-height:1.3}
+.place-tag{position:absolute;top:.5rem;right:.5rem;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);border-radius:20px;padding:.2rem .6rem;font-size:.7rem;color:var(--gold)}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
+#modal-overlay.open{opacity:1;pointer-events:all}
+#modal-box{background:#12121e;border:1px solid rgba(255,215,0,.2);border-radius:16px;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;transform:scale(.9);transition:transform .3s;position:relative}
+#modal-overlay.open #modal-box{transform:scale(1)}
+#modal-img{width:100%;height:240px;object-fit:cover;border-radius:16px 16px 0 0;display:block}
+#modal-img-ph{width:100%;height:240px;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:center;font-size:1rem;color:rgba(255,255,255,.5);font-weight:600}
+#modal-content{padding:1.5rem}
+#modal-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;margin-bottom:1rem}
+.modal-row{display:flex;gap:.8rem;margin-bottom:.8rem;align-items:flex-start}
+.modal-icon{font-size:1.2rem;flex-shrink:0;margin-top:.1rem}
+.modal-label{font-weight:600;color:var(--gold);font-size:.8rem;letter-spacing:1px;text-transform:uppercase}
+.modal-val{color:#ddd;font-size:.9rem;margin-top:.2rem}
+#modal-close{position:absolute;top:1rem;right:1rem;background:rgba(0,0,0,.7);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:1.1rem;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;transition:background .2s}
+#modal-close:hover{background:#c00}
+
+/* RESUMO */
+#resumo{background:#060612;padding:5rem 1rem}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;max-width:700px;margin:2rem auto 3rem}
+@media(min-width:600px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-card{background:var(--card-bg);border:1px solid rgba(255,215,0,.15);border-radius:12px;padding:1.5rem 1rem;text-align:center}
+.stat-icon{font-size:2rem;margin-bottom:.5rem}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--gold);line-height:1}
+.stat-label{font-size:.8rem;color:var(--muted);margin-top:.3rem}
+.cost-table{max-width:600px;margin:0 auto 3rem;border-collapse:collapse;width:100%}
+.cost-table th,.cost-table td{padding:.8rem 1rem;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);font-size:.9rem}
+.cost-table th{color:var(--gold);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:1px}
+.cost-total td{font-weight:700;color:var(--gold);border-top:2px solid var(--gold);border-bottom:none}
+
+/* CHECKLIST */
+#checklist-section{padding:4rem 1rem 6rem;max-width:700px;margin:auto}
+.progress-wrap{margin:1.5rem 0 2rem}
+.progress-label{font-size:.85rem;color:var(--muted);margin-bottom:.5rem}
+.progress-bar-bg{background:#222;border-radius:99px;height:12px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));border-radius:99px;transition:width .4s ease}
+.checklist-item{display:flex;align-items:center;gap:1rem;padding:.9rem 1rem;border-radius:8px;margin-bottom:.5rem;cursor:pointer;transition:background .2s;user-select:none}
+.checklist-item:hover{background:rgba(255,255,255,.04)}
+.checklist-item.done .item-name{text-decoration:line-through;color:#5a7}
+.check-box{width:22px;height:22px;border:2px solid var(--blue);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s;font-size:.9rem;color:#fff}
+.checklist-item.done .check-box{background:#5a7;border-color:#5a7}
+.item-name{font-size:.95rem}
+.item-day{font-size:.75rem;color:var(--muted);margin-left:auto}
+.reset-btn{display:block;margin:1.5rem auto 0;background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--muted);padding:.5rem 1.5rem;border-radius:99px;cursor:pointer;font-size:.8rem;transition:border-color .2s,color .2s}
+.reset-btn:hover{border-color:#c00;color:#c00}
+
+/* FOOTER */
+footer{text-align:center;padding:2rem;color:var(--muted);font-size:.8rem;border-top:1px solid rgba(255,255,255,.05)}
+@media(max-width:480px){.places-grid{grid-template-columns:repeat(2,1fr)}.day-num{font-size:2.5rem}}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#111}::-webkit-scrollbar-thumb{background:var(--blue);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section id="hero">
+  <h1 class="hero-title">VIAGEM<br>DOS AMIGOS</h1>
+  <p class="hero-sub">Rio de Janeiro &nbsp;•&nbsp; Fev 2025 &nbsp;•&nbsp; 4 Amigos</p>
+
+  <div id="plane-scene">
+    <svg id="plane-path-svg" viewBox="0 0 700 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 30 140 Q 350 -20 670 120" stroke="rgba(255,215,0,0.25)" stroke-width="2" stroke-dasharray="8 6" fill="none"/>
+    </svg>
+    <svg id="plane-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+      <path d="M60 32L8 12l10 20-10 20z" fill="#FFD700"/>
+      <path d="M18 32h18" stroke="#fff" stroke-width="2"/>
+      <path d="M22 32l-4 8" stroke="#fff" stroke-width="2"/>
+      <path d="M22 32l-4-8" stroke="#fff" stroke-width="2"/>
+    </svg>
+    <span class="city-label left">✈ Cuiabá</span>
+    <span class="city-label right">Rio de Janeiro 🏖</span>
+  </div>
+
+  <p class="hero-dates">16 → 22 de Fevereiro de 2025</p>
+  <button class="scroll-arrow" aria-label="Rolar para baixo" onclick="document.getElementById('itinerary').scrollIntoView({behavior:'smooth'})">↓</button>
+</section>
+
+<!-- ITINERARY (built by JS) -->
+<section id="itinerary">
+  <h2 class="section-title">O ROTEIRO</h2>
+</section>
+
+<!-- RESUMO -->
+<section id="resumo">
+  <h2 class="section-title">RESUMO DA VIAGEM</h2>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">🗓</div><div class="stat-num" data-target="6" data-prefix="">0</div><div class="stat-label">Dias de Viagem</div></div>
+    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-num" data-target="4" data-prefix="">0</div><div class="stat-label">Amigos</div></div>
+    <div class="stat-card"><div class="stat-icon">📍</div><div class="stat-num" data-target="22" data-prefix="">0</div><div class="stat-label">Locais</div></div>
+    <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-num" data-target="514" data-prefix="R$">0</div><div class="stat-label">Em atrações/pessoa</div></div>
+  </div>
+  <table class="cost-table">
+    <thead><tr><th>Atração</th><th>Custo/pessoa</th></tr></thead>
+    <tbody id="cost-tbody"></tbody>
+  </table>
+</section>
+
+<!-- CHECKLIST -->
+<section id="checklist-section">
+  <h2 class="section-title">✅ CHECKLIST DA GALERA</h2>
+  <div class="progress-wrap">
+    <div class="progress-label" id="progress-label">0 de 22 feitos</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+  <div id="checklist-list"></div>
+  <button class="reset-btn" onclick="resetChecklist()">Resetar tudo</button>
+</section>
+
+<footer>🌊 Viagem dos Amigos — Rio de Janeiro, Fevereiro 2025 &nbsp;|&nbsp; 4 amigos, 1 cidade, memórias pra vida toda</footer>
+
+<!-- MODAL -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div id="modal-box">
+    <button id="modal-close" aria-label="Fechar">✕</button>
+    <div id="modal-top"></div>
+    <div id="modal-content">
+      <h3 id="modal-title"></h3>
+      <div class="modal-row">
+        <span class="modal-icon">📍</span>
+        <div><div class="modal-label">Onde fica</div><div class="modal-val" id="modal-onde"></div></div>
+      </div>
+      <div class="modal-row">
+        <span class="modal-icon">💰</span>
+        <div><div class="modal-label">Preço</div><div class="modal-val" id="modal-preco"></div></div>
+      </div>
+      <div class="modal-row">
+        <span class="modal-icon">💡</span>
+        <div><div class="modal-label">Curiosidade</div><div class="modal-val" id="modal-curiosidade"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── DATA ─── */
+var PLACES = {
+  "Copacabana Blue Hotel": {
+    imgs: ["copahotel.jpeg.avif"],
+    onde: "Travessa Angrense, 25 – Copacabana",
+    preco: "A partir de R$ 360/noite",
+    curiosidade: "A Travessa Angrense fica a apenas 2 quadras da praia mais famosa do mundo.",
+    gradient: "linear-gradient(135deg,#1a3a6e,#0a1628)"
+  },
+  "Pizzaria Oggi": {
+    imgs: ["pizzariaogi1.jpg","pizariaoggi2.jpeg","pizzaria ogg.jpeg"],
+    onde: "R. Aristides Espinola, 101 – Leblon",
+    preco: "Média R$ 60–90/pessoa",
+    curiosidade: "Pizza napolitana com massa fermentada por 48h, eleita uma das melhores do Rio.",
+    gradient: "linear-gradient(135deg,#5a1a00,#2a0a00)"
+  },
+  "Caminhada em Copacabana": {
+    imgs: ["766589494.jpg","766591837.jpg"],
+    onde: "Orla de Copacabana – Copacabana",
+    preco: "Gratuito",
+    curiosidade: "O calçadão de Copacabana tem mosaico de ondas em pedra portuguesa, criado por Burle Marx nos anos 70.",
+    gradient: "linear-gradient(135deg,#006080,#001520)"
+  },
+  "Mureta da Urca": {
+    imgs: ["mureta.jpg","mureta2.jpg","muerta3.jpg"],
+    onde: "Av. João Luís Alves, 376 – Urca",
+    preco: "Gratuito (bebidas à parte)",
+    curiosidade: "Considerada o 'maior balcão de bar do mundo' com vista para o Pão de Açúcar.",
+    gradient: "linear-gradient(135deg,#1a4a1a,#061306)"
+  },
+  "Parque Lage": {
+    imgs: ["parquelaje.jpeg","parquelaje3.jpeg"],
+    onde: "R. Jardim Botânico, 414 – Jardim Botânico",
+    preco: "Gratuito",
+    curiosidade: "O casarão do parque foi cenário de diversas produções de cinema e TV brasileiras.",
+    gradient: "linear-gradient(135deg,#0a3a0a,#020d02)"
+  },
+  "Jardim Botânico": {
+    imgs: ["jardim botanico.jpeg","jardimbotanico1.jpeg","jardimbotanico3.jpg"],
+    onde: "R. Jardim Botânico, 1008 – Jardim Botânico",
+    preco: "R$ 40 (inteira)",
+    curiosidade: "Fundado em 1808 por Dom João VI, abriga mais de 6.500 espécies de plantas.",
+    gradient: "linear-gradient(135deg,#1a4a00,#062000)"
+  },
+  "Ipanema e Leblon": {
+    imgs: [],
+    onde: "Orla de Ipanema – Zona Sul",
+    preco: "Gratuito",
+    curiosidade: "A praia de Ipanema foi imortalizada pela bossa nova 'Garota de Ipanema' em 1962.",
+    gradient: "linear-gradient(135deg,#003a6e,#000d1a)"
+  },
+  "Pôr do sol no Arpoador": {
+    imgs: ["pordosol.jpg","pordosol3.jpg","sunset.jpeg","sunset1.jpeg"],
+    onde: "Pedra do Arpoador – Ipanema",
+    preco: "Gratuito",
+    curiosidade: "Em fevereiro o sol se põe por volta das 19h15 e a multidão aplaude ao final — é tradição!",
+    gradient: "linear-gradient(135deg,#5a2a00,#1a0500)"
+  },
+  "Baixo Botafogo": {
+    imgs: ["ruabotafogo.jpeg"],
+    onde: "Rua Voluntários da Pátria – Botafogo",
+    preco: "Média R$ 40–80/pessoa",
+    curiosidade: "O 'Baixo Bota' é o bairro mais moderno da noite carioca, repleto de bares autorais.",
+    gradient: "linear-gradient(135deg,#2a006e,#0a0020)"
+  },
+  "SAARA": {
+    imgs: ["saara.jpeg","saara.jpg","saara2.jpeg"],
+    onde: "Rua da Alfândega – Centro",
+    preco: "Gratuito (compras à parte)",
+    curiosidade: "Maior shopping a céu aberto da América Latina, com mais de 900 lojas em 12 ruas.",
+    gradient: "linear-gradient(135deg,#5a3a00,#1a0e00)"
+  },
+  "Escadaria Selarón": {
+    imgs: ["escadaria.jpeg","escadaria2.jpeg","escadaria3.jpeg"],
+    onde: "R. Manuel Carneiro – Santa Teresa",
+    preco: "Gratuito",
+    curiosidade: "Obra do artista chileno Jorge Selarón, feita com azulejos de mais de 60 países.",
+    gradient: "linear-gradient(135deg,#5a0000,#1a0000)"
+  },
+  "Arcos da Lapa": {
+    imgs: [],
+    onde: "Rua Mem de Sá – Lapa",
+    preco: "Gratuito",
+    curiosidade: "Construído no século XVIII como aqueduto, hoje sustenta o bonde de Santa Teresa.",
+    gradient: "linear-gradient(135deg,#3a3a00,#0e0e00)"
+  },
+  "Museu do Amanhã": {
+    imgs: ["museuamanah.webp","museuamanha4.jpg","museuamaah3.jpeg"],
+    onde: "Praça Mauá, 1 – Centro",
+    preco: "R$ 40 (inteira)",
+    curiosidade: "Projetado por Santiago Calatrava, é um dos museus de ciência mais visitados do Brasil.",
+    gradient: "linear-gradient(135deg,#003a5a,#000f1a)"
+  },
+  "AquaRio": {
+    imgs: ["aguario.jpg","aguari2.jpeg","aguario3.jpeg"],
+    onde: "Av. Rodrigues Alves – Porto Maravilha",
+    preco: "R$ 160 (inteira)",
+    curiosidade: "O maior aquário marinho da América do Sul, com 4,5 milhões de litros d'água.",
+    gradient: "linear-gradient(135deg,#003060,#000818)"
+  },
+  "Bosque Bar": {
+    imgs: ["bosquebar.jpg","bosquebar2.jpg"],
+    onde: "Av. Bartolomeu Mitre, 1314 – Gávea",
+    preco: "Média R$ 60–100/pessoa",
+    curiosidade: "Fica dentro do Jockey Club Brasileiro, mistura bar, balada e natureza.",
+    gradient: "linear-gradient(135deg,#1a3a00,#060e00)"
+  },
+  "Stand Up Paddle": {
+    imgs: ["standup.jpeg","standup1.jpeg","standup3.jpeg"],
+    onde: "Praia de Copacabana – Posto 6",
+    preco: "A partir de R$ 50/hora",
+    curiosidade: "Pegar o mar ao nascer do sol em Copacabana é uma das experiências mais únicas do Rio.",
+    gradient: "linear-gradient(135deg,#003860,#000c18)"
+  },
+  "Forte Duque de Caxias": {
+    imgs: ["forte.jpg","dorte2.jpg","forte3.jpeg"],
+    onde: "Praça Almirante Júlio de Noronha – Leme",
+    preco: "R$ 4",
+    curiosidade: "Do alto do forte é possível ver toda a extensão de Copacabana e o mar aberto.",
+    gradient: "linear-gradient(135deg,#3a2a00,#0e0800)"
+  },
+  "Sunset Morro da Urca": {
+    imgs: ["seunset2.jpeg","sunset.jpeg","sunset1.jpeg"],
+    onde: "Praia Vermelha – Urca",
+    preco: "Gratuito (trilha) ou R$ 195 (teleférico)",
+    curiosidade: "A trilha leva cerca de 40 minutos e já foi usada como rota de fuga durante a ditadura militar.",
+    gradient: "linear-gradient(135deg,#5a2a00,#180800)"
+  },
+  "Bar Urca": {
+    imgs: [],
+    onde: "R. Cândido Gaffrée – Urca",
+    preco: "Média R$ 30–60/pessoa",
+    curiosidade: "Fundado em 1939, é Patrimônio Histórico e Cultural do Estado do Rio de Janeiro.",
+    gradient: "linear-gradient(135deg,#1a1a4a,#050510)"
+  },
+  "Rio Scenarium": {
+    imgs: ["scenarim.jpeg","scnariuym3.jpeg"],
+    onde: "R. do Lavradio, 20 – Centro/Lapa",
+    preco: "R$ 45 (sábado)",
+    curiosidade: "Casarão do século XIX com 3 andares de decoração vintage e samba ao vivo toda semana.",
+    gradient: "linear-gradient(135deg,#3a001a,#0e0008)"
+  },
+  "Feira da Glória": {
+    imgs: [],
+    onde: "Av. Augusto Severo – Glória",
+    preco: "Gratuito",
+    curiosidade: "Aos domingos, a partir das 15h, roda de samba grátis anima a feira.",
+    gradient: "linear-gradient(135deg,#5a3a00,#180e00)"
+  },
+  "Aterro do Flamengo": {
+    imgs: ["aterrodofalemengo.webp","aterrodoflamegno2.jpg"],
+    onde: "Parque do Flamengo – Flamengo",
+    preco: "Gratuito",
+    curiosidade: "No domingo, as vias expressas do parque são fechadas para carros — só pedestres e bikes.",
+    gradient: "linear-gradient(135deg,#1a3a1a,#050e05)"
+  }
+};
+
+var DAYS = [
+  { num:"0", weekday:"Sábado",   date:"16/02", title:"Voo para o Rio",      sub:"Cuiabá → Rio de Janeiro ✈",            places:[] },
+  { num:"1", weekday:"Terça",    date:"17/02", title:"Chegada & Copa",      sub:"Check-in + primeiras aventuras cariocas", places:["Copacabana Blue Hotel","Pizzaria Oggi","Caminhada em Copacabana","Mureta da Urca"] },
+  { num:"2", weekday:"Quarta",   date:"18/02", title:"Zona Sul",             sub:"Natureza, praias e pôr do sol",          places:["Parque Lage","Jardim Botânico","Ipanema e Leblon","Pôr do sol no Arpoador","Baixo Botafogo"] },
+  { num:"3", weekday:"Quinta",   date:"19/02", title:"Centro & Lapa",        sub:"Cultura, história e balada carioca",     places:["SAARA","Escadaria Selarón","Arcos da Lapa","Museu do Amanhã","AquaRio","Bosque Bar"] },
+  { num:"4", weekday:"Sexta",    date:"20/02", title:"Urca & Leme",          sub:"Do mar ao Pão de Açúcar",               places:["Stand Up Paddle","Forte Duque de Caxias","Sunset Morro da Urca","Bar Urca","Rio Scenarium"] },
+  { num:"5", weekday:"Sábado",   date:"21/02", title:"Último Dia",           sub:"Despedida do Rio",                      places:["Feira da Glória","Aterro do Flamengo"] },
+  { num:"6", weekday:"Domingo",  date:"22/02", title:"Retorno",              sub:"De volta pra Cuiabá com saudade 🏠",     places:[] }
+];
+
+var COSTS = [
+  ["Jardim Botânico","R$ 40"],
+  ["Museu do Amanhã","R$ 40"],
+  ["AquaRio","R$ 160"],
+  ["Forte do Leme","R$ 4"],
+  ["Stand Up Paddle","R$ 180"],
+  ["Morro da Urca (trilha)","Grátis"],
+  ["Rio Scenarium","R$ 45"],
+  ["Bondinho – descida","R$ 45"]
+];
+
+/* ─── DOM HELPERS ─── */
+function el(tag, cls) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  return e;
+}
+function txt(tag, cls, text) {
+  var e = el(tag, cls);
+  e.textContent = text;
+  return e;
+}
+
+/* ─── BUILD ITINERARY ─── */
+var itinerary = document.getElementById('itinerary');
+
+DAYS.forEach(function(day, idx) {
+  var block = el('div','day-block');
+
+  // Header
+  var header = el('div','day-header');
+  var numEl = txt('div','day-num', 'D' + day.num);
+  var info = el('div');
+  var infoTitle = el('div','day-info-title');
+  infoTitle.textContent = day.weekday + ' — ' + day.date + '  ';
+  var accent = el('span');
+  accent.style.cssText = 'color:' + (idx % 2 === 0 ? 'var(--gold)' : 'var(--blue)') + ';font-size:.7em';
+  accent.textContent = day.title;
+  infoTitle.appendChild(accent);
+  var infoSub = txt('div','day-info-sub', day.sub);
+  info.appendChild(infoTitle);
+  info.appendChild(infoSub);
+  header.appendChild(numEl);
+  header.appendChild(info);
+  block.appendChild(header);
+
+  if (day.places.length === 0) {
+    var msg = txt('p','day-msg', day.num === '0' ? '✈ Dia de viagem — chegada prevista à noite.' : '🏠 Dia de retorno — até a próxima, Rio!');
+    block.appendChild(msg);
+  } else {
+    var grid = el('div','places-grid');
+    day.places.forEach(function(name) {
+      var info2 = PLACES[name] || {};
+      var card = el('div','place-card');
+      card.setAttribute('tabindex','0');
+      card.setAttribute('role','button');
+      card.setAttribute('aria-label','Ver detalhes de ' + name);
+
+      // image
+      var imgs = info2.imgs || [];
+      if (imgs.length > 0) {
+        var imgEl = el('img','place-img');
+        imgEl.alt = name;
+        imgEl.loading = 'lazy';
+        var ph2 = el('div','place-img-placeholder');
+        ph2.style.cssText = 'background:' + (info2.gradient || '#1a1a2e') + ';display:none';
+        ph2.textContent = name;
+        imgEl.onerror = (function(ph){ return function(){ this.style.display='none'; ph.style.display='flex'; }; })(ph2);
+        // try images in order
+        imgEl.src = imgs[0];
+        card.appendChild(imgEl);
+        card.appendChild(ph2);
+      } else {
+        var ph3 = el('div','place-img-placeholder');
+        ph3.style.cssText = 'background:' + (info2.gradient || '#1a1a2e');
+        ph3.textContent = name;
+        card.appendChild(ph3);
+      }
+
+      var nameEl = txt('div','place-name', name);
+      var tagEl = txt('div','place-tag', day.weekday);
+      card.appendChild(nameEl);
+      card.appendChild(tagEl);
+
+      card.addEventListener('click', (function(n){ return function(){ openModal(n); }; })(name));
+      card.addEventListener('keydown', (function(n){ return function(e){ if(e.key==='Enter'||e.key===' ') openModal(n); }; })(name));
+      grid.appendChild(card);
+    });
+    block.appendChild(grid);
+  }
+
+  itinerary.appendChild(block);
+});
+
+/* ─── COST TABLE ─── */
+var tbody = document.getElementById('cost-tbody');
+COSTS.forEach(function(row) {
+  var tr = el('tr');
+  var td1 = txt('td','',row[0]);
+  var td2 = txt('td','',row[1]);
+  tr.appendChild(td1);
+  tr.appendChild(td2);
+  tbody.appendChild(tr);
+});
+var trTotal = el('tr','cost-total');
+var tdT1 = txt('td','','Total Atrações Pagas');
+var tdT2 = txt('td','','~R$ 514');
+trTotal.appendChild(tdT1);
+trTotal.appendChild(tdT2);
+tbody.appendChild(trTotal);
+
+/* ─── MODAL ─── */
+var overlay = document.getElementById('modal-overlay');
+var modalTop = document.getElementById('modal-top');
+
+function openModal(name) {
+  var info = PLACES[name] || {};
+  document.getElementById('modal-title').textContent = name;
+  document.getElementById('modal-onde').textContent = info.onde || '—';
+  document.getElementById('modal-preco').textContent = info.preco || '—';
+  document.getElementById('modal-curiosidade').textContent = info.curiosidade || '—';
+
+  // clear previous image
+  while (modalTop.firstChild) modalTop.removeChild(modalTop.firstChild);
+
+  var ph = el('div');
+  ph.id = 'modal-img-ph';
+  ph.style.cssText = 'background:' + (info.gradient || '#1a1a2e');
+  ph.textContent = name;
+  modalTop.appendChild(ph);
+
+  var imgs = info.imgs || [];
+  if (imgs.length > 0) {
+    var tried = 0;
+    imgs.forEach(function(src) {
+      var probe = new Image();
+      probe.onload = (function(s){ return function() {
+        if (!modalTop.querySelector('img')) {
+          var imgEl = el('img');
+          imgEl.id = 'modal-img';
+          imgEl.src = s;
+          imgEl.alt = name;
+          ph.style.display = 'none';
+          modalTop.insertBefore(imgEl, modalTop.firstChild);
+        }
+      }; })(src);
+      probe.src = src;
+    });
+  }
+
+  overlay.classList.add('open');
+  document.getElementById('modal-close').focus();
+}
+
+function closeModal() { overlay.classList.remove('open'); }
+document.getElementById('modal-close').addEventListener('click', closeModal);
+overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+/* ─── INTERSECTION OBSERVER (fade-in) ─── */
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.day-block').forEach(function(b) { obs.observe(b); });
+
+/* ─── STAT COUNTERS ─── */
+var statsObs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) { animateStats(); statsObs.disconnect(); }
+  });
+}, { threshold: 0.3 });
+statsObs.observe(document.querySelector('.stats-grid'));
+
+function animateStats() {
+  document.querySelectorAll('.stat-num').forEach(function(el) {
+    var target = parseInt(el.dataset.target, 10);
+    var prefix = el.dataset.prefix || '';
+    var current = 0;
+    var step = Math.max(1, Math.ceil(target / 40));
+    var iv = setInterval(function() {
+      current = Math.min(current + step, target);
+      el.textContent = prefix + ' ' + current;
+      if (current >= target) clearInterval(iv);
+    }, 30);
+  });
+}
+
+/* ─── CHECKLIST ─── */
+var ALL_ITEMS = [];
+DAYS.forEach(function(d) {
+  d.places.forEach(function(p) { ALL_ITEMS.push({ name: p, day: d.weekday + ' ' + d.date }); });
+});
+var STORAGE_KEY = 'rj2025-checklist';
+
+function getChecked() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { return []; }
+}
+function saveChecked(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+
+function buildChecklist() {
+  var list = document.getElementById('checklist-list');
+  while (list.firstChild) list.removeChild(list.firstChild);
+  var checked = getChecked();
+
+  ALL_ITEMS.forEach(function(item) {
+    var done = checked.indexOf(item.name) !== -1;
+    var div = el('div','checklist-item' + (done ? ' done' : ''));
+
+    var box = el('div','check-box');
+    box.textContent = done ? '✓' : '';
+
+    var nameEl = txt('span','item-name', item.name);
+    var dayEl = txt('span','item-day', item.day);
+
+    div.appendChild(box);
+    div.appendChild(nameEl);
+    div.appendChild(dayEl);
+    div.addEventListener('click', (function(n){ return function(){ toggleItem(n); }; })(item.name));
+    list.appendChild(div);
+  });
+  updateProgress(checked.length);
+}
+
+function toggleItem(name) {
+  var checked = getChecked();
+  var idx = checked.indexOf(name);
+  if (idx !== -1) { checked.splice(idx, 1); } else { checked.push(name); }
+  saveChecked(checked);
+  buildChecklist();
+}
+
+function resetChecklist() { saveChecked([]); buildChecklist(); }
+
+function updateProgress(n) {
+  var total = ALL_ITEMS.length;
+  document.getElementById('progress-label').textContent = n + ' de ' + total + ' feitos';
+  document.getElementById('progress-fill').style.width = (n / total * 100) + '%';
+}
+
+buildChecklist();
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+# Secrets
+.env
+.env.*
+*.local
+
+# Node
+node_modules/
+dist/
+build/
+
+# System
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Prisma generated
+backend/src/generated/
+
+# Claude (local only)
+.claude/settings.local.json

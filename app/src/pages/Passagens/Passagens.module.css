@@ -1,0 +1,247 @@
+.page {
+  padding: 1.5rem 1rem 6rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--color-muted, #888);
+  margin-bottom: 1.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-muted, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input {
+  background: var(--color-surface, #1a1a2e);
+  border: 1px solid var(--color-border, #2a2a3e);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: inherit;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: var(--color-accent, #00c8ff);
+}
+
+.input::placeholder {
+  color: var(--color-muted, #666);
+}
+
+.swapBtn {
+  background: var(--color-surface, #1a1a2e);
+  border: 1px solid var(--color-border, #2a2a3e);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: inherit;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.swapBtn:hover {
+  background: var(--color-border, #2a2a3e);
+}
+
+.searchBtn {
+  background: var(--color-accent, #00c8ff);
+  color: #000;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 12px;
+  padding: 0.875rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.searchBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 80, 80, 0.12);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  border-radius: 10px;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+
+.results {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.count {
+  font-size: 0.85rem;
+  color: var(--color-muted, #888);
+  margin-bottom: 0.25rem;
+}
+
+.card {
+  background: var(--color-surface, #1a1a2e);
+  border: 1px solid var(--color-border, #2a2a3e);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1.25rem 1rem;
+}
+
+.airport {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 52px;
+}
+
+.time {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.iata {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-muted, #888);
+  letter-spacing: 0.05em;
+}
+
+.dateSmall {
+  font-size: 0.7rem;
+  color: var(--color-muted, #888);
+}
+
+.middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.duration {
+  font-size: 0.75rem;
+  color: var(--color-muted, #888);
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent, #00c8ff);
+  flex-shrink: 0;
+}
+
+.dashes {
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(
+    to right,
+    var(--color-muted, #555) 0,
+    var(--color-muted, #555) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.stopDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f0a500;
+  flex-shrink: 0;
+}
+
+.stops {
+  font-size: 0.7rem;
+  color: var(--color-muted, #888);
+}
+
+.cardBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--color-border, #2a2a3e);
+  background: rgba(0,0,0,0.15);
+}
+
+.carrier {
+  font-size: 0.8rem;
+  color: var(--color-muted, #888);
+}
+
+.priceArea {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-accent, #00c8ff);
+}
+
+.perPerson {
+  font-size: 0.7rem;
+  color: var(--color-muted, #888);
+}

@@ -1,0 +1,5 @@
+/* App-level resets — all styles live in index.css */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

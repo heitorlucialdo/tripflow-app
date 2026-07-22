@@ -1,0 +1,40 @@
+.container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  background: #0f2040;
+  border: 1px solid rgba(79, 195, 247, 0.2);
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aviao {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  offset-path: ellipse(44px 13px at 60px 60px);
+  offset-rotate: 0deg;
+  offset-anchor: center;
+  filter: drop-shadow(0 0 4px rgba(79, 195, 247, 0.6));
+  animation:
+    percorrer   3s linear infinite,
+    profundidade 3s linear infinite;
+}
+
+@keyframes percorrer {
+  from { offset-distance: 0%; }
+  to   { offset-distance: 100%; }
+}
+
+@keyframes profundidade {
+  0%   { opacity: 1; transform: scale(1.1); }
+  24%  { opacity: 1; transform: scale(1.1); }
+  25%  { opacity: 1; transform: scale(1);   }
+  26%  { opacity: 0; }
+  74%  { opacity: 0; }
+  75%  { opacity: 0; }
+  76%  { opacity: 1; transform: scale(1);   }
+  100% { opacity: 1; transform: scale(1.1); }
+}
