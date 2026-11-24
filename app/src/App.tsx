@@ -11,6 +11,7 @@ import { ModoAoVivo } from "./components/ModoAoVivo";
 import { Gastos } from "./components/Gastos";
 import { BottomNav } from "./components/BottomNav";
 import { MenuLateral } from "./components/MenuLateral/MenuLateral";
+import { InstallPrompt } from "./components/InstallPrompt";
 import type { Tab } from "./components/BottomNav";
 import { useNotes } from "./hooks/useNotes";
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -24,26 +25,33 @@ import { Passagens } from "./pages/Passagens/Passagens";
 import { Perfil } from "./pages/Perfil/Perfil";
 import { Grupo } from "./pages/Grupo/Grupo";
 import { DAYS } from "./data";
+
+const TABS: Tab[] = ["home", "fotos", "gastos", "checklist", "memorias", "aovivo", "mapa"];
+
+function initialTab(): Tab {
+  const param = new URLSearchParams(window.location.search).get("tab");
+  return TABS.find((t) => t === param) ?? "home";
+}
 import "./App.css";
 
 export default function App() {
   const [showSplash, setShowSplash]   = useState(true);
   const handleSplashFinish = useCallback(() => setShowSplash(false), []);
 
-  const [tab, setTab]                 = useState<Tab>("home");
+  const [tab, setTab]                 = useState<Tab>(initialTab);
   const [activePlace, setActivePlace] = useState<string | null>(null);
   const [menuOpen, setMenuOpen]       = useState(false);
   const [showPerfil, setShowPerfil]   = useState(false);
   const [showGrupo, setShowGrupo]     = useState(false);
-  const [showComoVai, setShowComoVai] = useState(false);
+  const [, setShowComoVai]            = useState(false);
   const { notes, save }               = useNotes();
   const { user, loading }             = useAuth();
 
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
 
   if (loading) return (
-    <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0a0a" }}>
-      <div style={{ width: 32, height: 32, border: "3px solid #1e2130", borderTopColor: "#00c8ff", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+    <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "#060b1c" }}>
+      <div style={{ width: 32, height: 32, border: "3px solid #18233f", borderTopColor: "#3dd9ff", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
     </div>
   );
 
@@ -83,14 +91,14 @@ export default function App() {
         <>
           <Hero />
           <section id="itinerary" className="itinerary">
-            <h2 className="section-title">O ROTEIRO</h2>
+            <h2 className="section-title">O roteiro</h2>
             {DAYS.map((day, i) => (
               <DayBlock key={day.num} day={day} index={i} onPlaceClick={setActivePlace} />
             ))}
           </section>
           <Resumo />
           <footer className="site-footer">
-            🌊 Viagem dos Amigos — Rio de Janeiro, Fevereiro 2026 &nbsp;|&nbsp; 4 amigos, 1 cidade, memórias pra vida toda
+            TripFlow · Viagem dos Amigos — Rio de Janeiro, fev 2026
           </footer>
         </>
       )}
@@ -105,6 +113,7 @@ export default function App() {
       {tab === "mapa"      && <div className="tab-page"><Mapa key="mapa-tab" /></div>}
 
       <BottomNav tab={tab} setTab={setTab} />
+      <InstallPrompt />
 
       <Modal
         name={activePlace}

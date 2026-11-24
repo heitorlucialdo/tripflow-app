@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { DayData } from "../data";
 import { PlaceCard } from "./PlaceCard";
+import { Icon } from "./Icon";
 
 interface Props {
   day: DayData;
@@ -28,40 +29,41 @@ export function DayBlock({ day, index, onPlaceClick }: Props) {
     return () => observer.disconnect();
   }, []);
 
-  const accentColor = index % 2 === 0 ? "var(--gold)" : "var(--blue)";
+  const accent = index % 2 === 0 ? "var(--sky)" : "var(--sunset)";
   const isEmpty = day.places.length === 0;
 
   return (
     <div
       ref={ref}
       className={`day-block${visible ? " visible" : ""}`}
+      style={{ ["--accent" as string]: accent }}
     >
-      <div className="day-header" style={{ borderColor: accentColor }}>
-        <div className="day-num" style={{ color: accentColor }}>
-          D{day.num}
+      <div className="day-header">
+        <div className="day-num">
+          <span className="day-num-label">DIA</span>
+          {day.num}
         </div>
-        <div>
-          <div className="day-info-title">
-            {day.weekday} — {day.date}&nbsp;&nbsp;
-            <span style={{ color: accentColor, fontSize: ".7em" }}>{day.title}</span>
-          </div>
+        <div className="day-info">
+          <div className="day-info-kicker">{day.weekday} · {day.date}</div>
+          <div className="day-info-title">{day.title}</div>
           <div className="day-info-sub">{day.sub}</div>
         </div>
       </div>
 
       {isEmpty ? (
         <p className="day-msg">
+          <Icon name="plane" size={18} />
           {day.num === "0"
-            ? "✈ Dia de viagem — chegada prevista à noite."
-            : "🏠 Dia de retorno — até a próxima, Rio!"}
+            ? "Dia de viagem — chegada prevista à noite."
+            : "Dia de retorno — até a próxima!"}
         </p>
       ) : (
         <div className="places-grid">
-          {day.places.map((name) => (
+          {day.places.map((name, i) => (
             <PlaceCard
               key={name}
               name={name}
-              weekday={day.weekday}
+              order={i + 1}
               onClick={() => onPlaceClick(name)}
             />
           ))}

@@ -4,7 +4,7 @@ import { StatCard } from "./StatCard";
 export function Resumo() {
   return (
     <section className="resumo">
-      <h2 className="section-title">RESUMO DA VIAGEM</h2>
+      <h2 className="section-title">Resumo da viagem</h2>
 
       <div className="stats-grid">
         <StatCard icon="/icons_menu/calendario.svg" target={6}   label="Dias de Viagem" />

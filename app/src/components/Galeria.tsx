@@ -29,7 +29,7 @@ export function Galeria() {
 
   return (
     <section className="galeria-section">
-      <h2 className="section-title">NOSSAS MEMÓRIAS</h2>
+      <h2 className="section-title">Nossas memórias</h2>
       <p className="galeria-sub">Clique em qualquer foto para ver em tela cheia</p>
 
       <div className="galeria-grid">

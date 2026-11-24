@@ -1,15 +1,19 @@
+import { Icon, type IconName } from "./Icon";
+
 export type Tab = "home" | "fotos" | "gastos" | "checklist" | "memorias" | "aovivo" | "mapa" | "passagens" | "grupo";
 
-const LEFT_ITEMS: { id: Tab; icon: string; label: string }[] = [
-  // { id: "passagens", icon: "/icons_menu/passagens.svg", label: "Voos" }, // reativar na Fase 2
-  { id: "fotos",     icon: "/icons_menu/fotos.svg",     label: "Fotos"   },
-  { id: "gastos",    icon: "/icons_menu/gastos.svg",    label: "Gastos"  },
-  { id: "checklist", icon: "/icons_menu/lista.svg",     label: "Lista"   },
+type Item = { id: Tab; icon: IconName; label: string };
+
+// passagens volta na Fase 2: { id: "passagens", icon: "plane", label: "Voos" }
+const LEFT_ITEMS: Item[] = [
+  { id: "fotos",     icon: "camera",    label: "Fotos"  },
+  { id: "gastos",    icon: "wallet",    label: "Gastos" },
+  { id: "checklist", icon: "checklist", label: "Lista"  },
 ];
-const RIGHT_ITEMS: { id: Tab; icon: string; label: string }[] = [
-  { id: "memorias",  icon: "/icons_menu/memorias.svg", label: "Memórias" },
-  { id: "aovivo",    icon: "/icons_menu/aovivo.svg",   label: "Ao Vivo"  },
-  { id: "mapa",      icon: "/icons_menu/mapa.svg",     label: "Mapa"     },
+const RIGHT_ITEMS: Item[] = [
+  { id: "memorias", icon: "film",  label: "Memórias" },
+  { id: "aovivo",   icon: "radar", label: "Ao Vivo"  },
+  { id: "mapa",     icon: "map",   label: "Mapa"     },
 ];
 
 interface Props {
@@ -23,38 +27,37 @@ export function BottomNav({ tab, setTab }: Props) {
     window.scrollTo({ top: 0, behavior: "instant" });
   }
 
-  return (
-    <nav className="bottom-nav">
-      {LEFT_ITEMS.map(item => (
-        <button
-          key={item.id}
-          className={`bnav-item ${tab === item.id ? "bnav-active" : ""}`}
-          onClick={() => go(item.id)}
-        >
-          <span className="bnav-icon-wrap">
-            <img src={item.icon} alt="" className="bnav-icon-img" aria-hidden="true" />
-          </span>
-          <span className="bnav-label">{item.label}</span>
-        </button>
-      ))}
-
-      {/* Centro — IA (desativado por enquanto) */}
-      <button className="bnav-center" aria-label="IA" disabled>
-        <img src="/icons_menu/ia.svg" alt="" className="bnav-center-img" aria-hidden="true" />
+  function renderItem(item: Item) {
+    const active = tab === item.id;
+    return (
+      <button
+        key={item.id}
+        className={`bnav-item ${active ? "bnav-active" : ""}`}
+        onClick={() => go(active ? "home" : item.id)}
+        aria-current={active ? "page" : undefined}
+        aria-label={item.label}
+      >
+        <span className="bnav-icon-wrap">
+          <Icon name={item.icon} size={22} />
+        </span>
+        <span className="bnav-label">{item.label}</span>
       </button>
+    );
+  }
 
-      {RIGHT_ITEMS.map(item => (
-        <button
-          key={item.id}
-          className={`bnav-item ${tab === item.id ? "bnav-active" : ""}`}
-          onClick={() => go(item.id)}
-        >
-          <span className="bnav-icon-wrap">
-            <img src={item.icon} alt="" className="bnav-icon-img" aria-hidden="true" />
-          </span>
-          <span className="bnav-label">{item.label}</span>
+  return (
+    <nav className="bottom-nav" aria-label="Navegação principal">
+      <div className="bnav-pill">
+        {LEFT_ITEMS.map(renderItem)}
+
+        <button className="bnav-center" aria-label="Assistente IA (em breve)" disabled>
+          <span className="bnav-center-ring" />
+          <Icon name="sparkle" size={24} strokeWidth={1.6} />
+          <span className="bnav-soon">em breve</span>
         </button>
-      ))}
+
+        {RIGHT_ITEMS.map(renderItem)}
+      </div>
     </nav>
   );
 }

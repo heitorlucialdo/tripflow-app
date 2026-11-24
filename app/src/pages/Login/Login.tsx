@@ -102,7 +102,12 @@ export function Login() {
       </div>
 
       <div className={styles.card}>
+        <div className={styles.brand}>
+          <img src="/favicon.svg" alt="" className={styles.brandMark} />
+          <span>Trip<b>Flow</b></span>
+        </div>
         <h1 className={styles.title}>Comece sua jornada</h1>
+        <p className={styles.subtitle}>Roteiro, gastos e fotos do grupo — tudo num só lugar.</p>
 
         {/* Google */}
         <button className={styles.googleBtn} onClick={signInWithGoogle} type="button">

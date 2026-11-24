@@ -55,7 +55,7 @@ export function Checklist() {
 
   return (
     <section className="checklist-section">
-      <h2 className="section-title">CHECKLIST DA GALERA</h2>
+      <h2 className="section-title">Checklist da galera</h2>
 
       <div className="progress-wrap">
         <div className="progress-label">

@@ -3,11 +3,11 @@ import { PLACES } from "../data";
 
 interface Props {
   name: string;
-  weekday: string;
+  order: number;
   onClick: () => void;
 }
 
-export function PlaceCard({ name, weekday, onClick }: Props) {
+export function PlaceCard({ name, order, onClick }: Props) {
   const info = PLACES[name];
   const [imgFailed, setImgFailed] = useState(false);
   const firstImg = info?.imgs[0];
@@ -35,13 +35,12 @@ export function PlaceCard({ name, weekday, onClick }: Props) {
         <div
           className="place-img-placeholder"
           style={{ background: info?.gradient ?? "#1a1a2e" }}
-        >
-          {name}
-        </div>
+        />
       )}
 
+      <div className="place-shade" />
+      <div className="place-tag">{String(order).padStart(2, "0")}</div>
       <div className="place-name">{name}</div>
-      <div className="place-tag">{weekday}</div>
     </div>
   );
 }

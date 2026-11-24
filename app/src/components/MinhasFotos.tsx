@@ -37,7 +37,7 @@ export function MinhasFotos() {
 
   return (
     <section className="minhasfotos-section">
-      <h2 className="section-title">NOSSAS FOTOS</h2>
+      <h2 className="section-title">Nossas fotos</h2>
       <p className="galeria-sub">Fotos tiradas por vocês durante a viagem — salvas no seu celular</p>
 
       <div className="minhasfotos-actions">

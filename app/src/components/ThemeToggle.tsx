@@ -1,4 +1,5 @@
 import { useTheme } from "../hooks/useTheme";
+import { Icon } from "./Icon";
 
 export function ThemeToggle() {
   const { dark, toggle } = useTheme();
@@ -9,12 +10,9 @@ export function ThemeToggle() {
       aria-label={dark ? "Ativar tema claro" : "Ativar tema escuro"}
       title={dark ? "Tema claro" : "Tema escuro"}
     >
-      <img
-        src={dark ? "/icons_menu/sol.svg" : "/icons_menu/lua.svg"}
-        alt=""
-        className="theme-toggle-icon"
-        aria-hidden="true"
-      />
+      <span className="theme-toggle-icon" key={dark ? "sun" : "moon"}>
+        <Icon name={dark ? "sun" : "moon"} size={19} />
+      </span>
     </button>
   );
 }

@@ -7,36 +7,35 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'imgs/**/*'],
+      includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png', 'imgs/**/*'],
       manifest: {
-        name: 'Viagem dos Amigos — Rio 2026',
-        short_name: 'Viagem RJ',
-        description: 'Roteiro da viagem dos amigos pro Rio de Janeiro, Fevereiro 2026',
-        theme_color: '#0a0a0a',
-        background_color: '#0a0a0a',
+        id: '/',
+        name: 'TripFlow — sua viagem em grupo',
+        short_name: 'TripFlow',
+        description: 'Roteiro, gastos, fotos e grupo da sua viagem em um só lugar.',
+        lang: 'pt-BR',
+        theme_color: '#060b1c',
+        background_color: '#060b1c',
         display: 'standalone',
+        display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait',
         start_url: '/',
+        scope: '/',
+        categories: ['travel', 'lifestyle', 'productivity'],
         icons: [
-          {
-            src: 'icons/icon-192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'icons/icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: 'icons/icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable',
-          },
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
+        shortcuts: [
+          { name: 'Gastos', url: '/?tab=gastos', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
+          { name: 'Lista', url: '/?tab=checklist', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
+          { name: 'Mapa', url: '/?tab=mapa', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
         ],
       },
       workbox: {
+        navigateFallback: '/index.html',
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpeg,jpg,avif,woff2}'],
         runtimeCaching: [
           {
@@ -45,6 +44,14 @@ export default defineConfig({
             options: {
               cacheName: 'google-fonts',
               expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/tile\.openstreetmap\.org\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'map-tiles',
+              expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
           {

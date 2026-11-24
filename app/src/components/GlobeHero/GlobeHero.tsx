@@ -41,7 +41,7 @@ export default function GlobeHero() {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
-    renderer.setClearColor(isLight() ? 0xcce8ff : 0x000000);
+    renderer.setClearColor(isLight() ? 0xf3f6fd : 0x060b1c);
     wrapper.appendChild(renderer.domElement);
 
     // ── Scene & Camera ──
@@ -187,7 +187,7 @@ export default function GlobeHero() {
     // ── Theme observer — reacts to dark/light toggle without remounting ──
     const applyTheme = () => {
       const light = isLight();
-      renderer.setClearColor(light ? 0xcce8ff : 0x000000);
+      renderer.setClearColor(light ? 0xf3f6fd : 0x060b1c);
       stars.visible  = !light;
       atmoMat.opacity = light ? 0.35 : 0.15;
       atmoMat.needsUpdate = true;

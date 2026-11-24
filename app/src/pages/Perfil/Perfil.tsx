@@ -11,7 +11,7 @@ interface Props {
 type Section = "perfil" | "conta";
 
 export function Perfil({ onClose }: Props) {
-  const { user, signOut, updatePassword } = useAuth();
+  const { user, signOut } = useAuth();
   const { saveProfile } = useProfile();
   const fileRef = useRef<HTMLInputElement>(null);
 

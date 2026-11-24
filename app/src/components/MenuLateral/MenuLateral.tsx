@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import styles from "./MenuLateral.module.css";
 import { useAuth } from "../../hooks/useAuth";
+import { Icon } from "../Icon";
 
 interface Props {
   open: boolean;
@@ -20,7 +21,6 @@ export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenCo
     ? name.split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase()
     : email[0]?.toUpperCase() ?? "?";
 
-  // Trava o scroll do fundo enquanto o menu estiver aberto
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -58,30 +58,30 @@ export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenCo
         {/* Itens do menu */}
         <nav className={styles.nav}>
           <button className={styles.item} onClick={() => handle(onOpenComoVai)}>
-            <span className={styles.itemIcon}>✈️</span>
+            <span className={styles.itemIcon}><Icon name="plane" size={20} /></span>
             <div className={styles.itemText}>
               <span className={styles.itemLabel}>Como Vai</span>
               <span className={styles.itemDesc}>Resumo da sua viagem</span>
             </div>
-            <span className={styles.chevron}>›</span>
+            <Icon name="chevron" size={16} className={styles.chevron} />
           </button>
 
           <button className={styles.item} onClick={() => handle(onOpenGrupo)}>
-            <span className={styles.itemIcon}>👥</span>
+            <span className={styles.itemIcon}><Icon name="users" size={20} /></span>
             <div className={styles.itemText}>
               <span className={styles.itemLabel}>Grupo da Viagem</span>
               <span className={styles.itemDesc}>Membros e convites</span>
             </div>
-            <span className={styles.chevron}>›</span>
+            <Icon name="chevron" size={16} className={styles.chevron} />
           </button>
 
           <button className={styles.item} onClick={() => handle(onOpenPerfil)}>
-            <span className={styles.itemIcon}>👤</span>
+            <span className={styles.itemIcon}><Icon name="user" size={20} /></span>
             <div className={styles.itemText}>
               <span className={styles.itemLabel}>Meu Perfil</span>
               <span className={styles.itemDesc}>Dados da conta</span>
             </div>
-            <span className={styles.chevron}>›</span>
+            <Icon name="chevron" size={16} className={styles.chevron} />
           </button>
         </nav>
 
