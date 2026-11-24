@@ -1,0 +1,219 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: calc(70px + env(safe-area-inset-bottom));
+}
+
+.sheet {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  background: #0e1120;
+  border-radius: 24px 24px 0 0;
+  padding: 1rem 1.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: 85dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  margin: 0 auto 0.25rem;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.tripCard {
+  background: var(--gradient);
+  border-radius: 16px;
+  padding: 1px;
+}
+
+.tripInfo {
+  background: #0e1120;
+  border-radius: 15px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tripName {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.tripRoute {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.6);
+}
+
+.tripDates {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.4);
+}
+
+.addBtn {
+  background: var(--gradient);
+  border: none;
+  border-radius: 8px;
+  padding: 0.3rem 0.75rem;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.addBtn:hover { opacity: 0.85; }
+
+.hint {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.4);
+}
+
+.emptyMembers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.emptyIcon { font-size: 1.75rem; }
+
+.emptyText {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.35);
+  max-width: 260px;
+}
+
+/* Código */
+.codigoBox {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.codigoText {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #ffffff;
+}
+
+.copyBtn {
+  background: var(--gradient);
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.875rem;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+  min-width: 70px;
+}
+
+.copyBtn:hover { opacity: 0.85; }
+
+/* Entrar */
+.entrarForm {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.inputWrap {
+  background: var(--gradient);
+  border-radius: 11px;
+  padding: 1px;
+  flex: 1;
+}
+
+.input {
+  background: #0e1120;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: #fff;
+  width: 100%;
+  outline: none;
+  display: block;
+  box-sizing: border-box;
+  letter-spacing: 0.05em;
+}
+
+.input::placeholder { color: rgba(255,255,255,0.25); }
+
+.entrarBtn {
+  background: var(--gradient);
+  border: none;
+  border-radius: 10px;
+  padding: 0 1.25rem;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.entrarBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

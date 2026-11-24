@@ -10,6 +10,7 @@ import { MinhasFotos } from "./components/MinhasFotos";
 import { ModoAoVivo } from "./components/ModoAoVivo";
 import { Gastos } from "./components/Gastos";
 import { BottomNav } from "./components/BottomNav";
+import { MenuLateral } from "./components/MenuLateral/MenuLateral";
 import type { Tab } from "./components/BottomNav";
 import { useNotes } from "./hooks/useNotes";
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -20,17 +21,23 @@ import { SplashScreen } from "./components/SplashScreen/SplashScreen";
 import { Cadastro } from "./pages/Cadastro/Cadastro";
 import { NovaSenha } from "./pages/NovaSenha/NovaSenha";
 import { Passagens } from "./pages/Passagens/Passagens";
+import { Perfil } from "./pages/Perfil/Perfil";
+import { Grupo } from "./pages/Grupo/Grupo";
 import { DAYS } from "./data";
 import "./App.css";
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash]   = useState(true);
   const handleSplashFinish = useCallback(() => setShowSplash(false), []);
 
-  const [tab, setTab]             = useState<Tab>("home");
+  const [tab, setTab]                 = useState<Tab>("home");
   const [activePlace, setActivePlace] = useState<string | null>(null);
-  const { notes, save }           = useNotes();
-  const { user, loading }         = useAuth();
+  const [menuOpen, setMenuOpen]       = useState(false);
+  const [showPerfil, setShowPerfil]   = useState(false);
+  const [showGrupo, setShowGrupo]     = useState(false);
+  const [showComoVai, setShowComoVai] = useState(false);
+  const { notes, save }               = useNotes();
+  const { user, loading }             = useAuth();
 
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
 
@@ -51,18 +58,25 @@ export default function App() {
 
   return (
     <>
-      {/* Home button — top-left, visible when not on home tab */}
-      {tab !== "home" && (
-        <button
-          className="home-btn"
-          onClick={() => { setTab("home"); window.scrollTo({ top: 0, behavior: "instant" }); }}
-          aria-label="Voltar para início"
-        >
-          <img src="/icons_menu/home.svg" alt="" aria-hidden="true" />
-        </button>
-      )}
+      {/* Hamburguer — top-left, sempre visível */}
+      <button
+        className="menu-btn"
+        onClick={() => setMenuOpen(true)}
+        aria-label="Abrir menu"
+      >
+        <span /><span /><span />
+      </button>
 
       <ThemeToggle />
+
+      {/* Menu lateral */}
+      <MenuLateral
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onOpenPerfil={() => setShowPerfil(true)}
+        onOpenGrupo={() => setShowGrupo(true)}
+        onOpenComoVai={() => setShowComoVai(true)}
+      />
 
       {/* HOME — Hero + Roteiro + Resumo */}
       {tab === "home" && (
@@ -81,7 +95,7 @@ export default function App() {
         </>
       )}
 
-      {/* SEÇÕES — cada uma em sua própria "tela" */}
+      {/* SEÇÕES */}
       {tab === "passagens" && <div className="tab-page"><Passagens /></div>}
       {tab === "fotos"     && <div className="tab-page"><MinhasFotos /></div>}
       {tab === "gastos"    && <div className="tab-page"><Gastos /></div>}
@@ -98,6 +112,9 @@ export default function App() {
         note={activePlace ? (notes[activePlace] ?? "") : ""}
         onSaveNote={(text) => activePlace && save(activePlace, text)}
       />
+
+      {showPerfil   && <Perfil onClose={() => setShowPerfil(false)} />}
+      {showGrupo    && <Grupo  onClose={() => setShowGrupo(false)} />}
     </>
   );
 }

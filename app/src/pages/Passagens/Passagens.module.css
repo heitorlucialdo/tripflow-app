@@ -1,5 +1,5 @@
 .page {
-  padding: 1.5rem 1rem 6rem;
+  padding: 4.5rem 1rem 6rem;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -8,6 +8,7 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.25rem;
+  color: #ffffff;
 }
 
 .subtitle {
@@ -43,49 +44,78 @@
   letter-spacing: 0.05em;
 }
 
+/* Wrapper que cria a borda gradiente — fundo gradiente + padding 1px */
+.inputWrap {
+  background: var(--gradient);
+  border-radius: 11px;
+  padding: 1px;
+  flex: 1;
+  width: 100%;
+}
+
 .input {
-  background: var(--color-surface, #1a1a2e);
-  border: 1px solid var(--color-border, #2a2a3e);
+  background: #0e1120;
+  border: none;
   border-radius: 10px;
   padding: 0.75rem 1rem;
   font-size: 1rem;
   color: inherit;
   width: 100%;
   outline: none;
-  transition: border-color 0.2s;
-}
-
-.input:focus {
-  border-color: var(--color-accent, #00c8ff);
+  display: block;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .input::placeholder {
   color: var(--color-muted, #666);
 }
 
+/* Wrapper específico para select — adiciona seta customizada */
+.selectWrap {
+  background: var(--gradient);
+  border-radius: 11px;
+  padding: 1px;
+  width: 100%;
+  position: relative;
+}
+
+.selectWrap::after {
+  content: "⌄";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-55%);
+  color: #888;
+  pointer-events: none;
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .swapBtn {
-  background: var(--color-surface, #1a1a2e);
-  border: 1px solid var(--color-border, #2a2a3e);
+  background: var(--gradient);
+  border: none;
   border-radius: 50%;
   width: 40px;
   height: 40px;
   font-size: 1.1rem;
   cursor: pointer;
-  color: inherit;
+  color: #fff;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: opacity 0.2s;
 }
 
 .swapBtn:hover {
-  background: var(--color-border, #2a2a3e);
+  opacity: 0.85;
 }
 
 .searchBtn {
-  background: var(--color-accent, #00c8ff);
-  color: #000;
+  background: var(--gradient);
+  color: #fff;
   font-weight: 700;
   font-size: 1rem;
   border: none;

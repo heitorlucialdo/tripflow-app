@@ -1,7 +1,8 @@
-export type Tab = "home" | "fotos" | "gastos" | "checklist" | "memorias" | "aovivo" | "mapa" | "passagens";
+export type Tab = "home" | "fotos" | "gastos" | "checklist" | "memorias" | "aovivo" | "mapa" | "passagens" | "grupo";
 
 const LEFT_ITEMS: { id: Tab; icon: string; label: string }[] = [
-  { id: "passagens", icon: "/icons_menu/passagens.svg", label: "Voos"    },
+  // { id: "passagens", icon: "/icons_menu/passagens.svg", label: "Voos" }, // reativar na Fase 2
+  { id: "fotos",     icon: "/icons_menu/fotos.svg",     label: "Fotos"   },
   { id: "gastos",    icon: "/icons_menu/gastos.svg",    label: "Gastos"  },
   { id: "checklist", icon: "/icons_menu/lista.svg",     label: "Lista"   },
 ];
@@ -37,12 +38,8 @@ export function BottomNav({ tab, setTab }: Props) {
         </button>
       ))}
 
-      {/* Center — IA (sem função por enquanto) */}
-      <button
-        className="bnav-center"
-        aria-label="IA"
-        disabled
-      >
+      {/* Centro — IA (desativado por enquanto) */}
+      <button className="bnav-center" aria-label="IA" disabled>
         <img src="/icons_menu/ia.svg" alt="" className="bnav-center-img" aria-hidden="true" />
       </button>
 

@@ -3,6 +3,9 @@
 
 :root,
 [data-theme="dark"] {
+  /* Gradiente padrão — usado em botões, bordas de inputs e cards */
+  --gradient: linear-gradient(135deg, #00c8ff, #0057a8);
+
   /* Neon blue palette */
   --neon: #00c8ff;
   --neon-dim: #0077aa;
@@ -34,6 +37,7 @@
 }
 
 [data-theme="light"] {
+  --gradient: linear-gradient(135deg, #0088dd, #003d8f);
   --neon: #0044cc;
   --neon-dim: #1a5fa8;
   --blue: #0055bb;
@@ -297,13 +301,14 @@ body {
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(3rem, 10vw, 6rem);
   text-align: center;
-  color: var(--gold);
+  color: #ffffff;
   letter-spacing: 3px;
   margin-bottom: 3rem;
-  text-shadow: 0 0 20px rgba(0,200,255,.5), 0 0 40px rgba(0,200,255,.2);
+  text-shadow: none;
 }
 [data-theme="light"] .section-title {
-  text-shadow: 0 0 16px rgba(0,68,204,.25);
+  color: #111111;
+  text-shadow: none;
 }
 
 /* ── ITINERARY ── */
@@ -1197,7 +1202,7 @@ body {
 .live-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 2rem;
-  color: var(--text);
+  color: #ffffff;
   letter-spacing: 2px;
   line-height: 1;
 }
@@ -1461,7 +1466,7 @@ body {
 .gastos-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 2rem;
-  color: var(--text);
+  color: #ffffff;
   letter-spacing: 2px;
   line-height: 1;
 }
@@ -1766,7 +1771,7 @@ body {
 }
 .bnav-item.bnav-active .bnav-label { color: #5bb8ff; opacity: 1; }
 
-/* Center AI button */
+/* Center IA button */
 .bnav-center {
   flex: 0 0 64px;
   display: flex;
@@ -1780,8 +1785,7 @@ body {
   cursor: not-allowed;
   color: #fff;
   margin-bottom: 10px;
-  box-shadow: 0 4px 20px rgba(0,119,182,.5), 0 0 0 0 rgba(0,119,182,.3);
-  transition: box-shadow .3s;
+  box-shadow: 0 4px 20px rgba(0,119,182,.5);
   padding: 0;
   justify-content: center;
   opacity: 0.7;
@@ -1790,6 +1794,37 @@ body {
   width: 60px;
   height: 60px;
   filter: brightness(0) invert(1) opacity(0.9);
+}
+
+/* Botão hamburguer — top-left, abre menu lateral */
+.menu-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+  width: 38px;
+  height: 38px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  transition: background 0.2s;
+}
+.menu-btn:hover {
+  background: rgba(255,255,255,0.12);
+}
+.menu-btn span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 2px;
 }
 
 /* Tab pages — add bottom padding for nav */

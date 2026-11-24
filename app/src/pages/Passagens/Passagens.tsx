@@ -53,14 +53,16 @@ export function Passagens() {
         <div className={styles.row}>
           <div className={styles.field}>
             <label className={styles.label}>Origem</label>
-            <input
-              className={styles.input}
-              placeholder="GRU"
-              maxLength={3}
-              value={origin}
-              onChange={e => setOrigin(e.target.value.toUpperCase())}
-              required
-            />
+            <div className={styles.inputWrap}>
+              <input
+                className={styles.input}
+                placeholder="GRU"
+                maxLength={3}
+                value={origin}
+                onChange={e => setOrigin(e.target.value.toUpperCase())}
+                required
+              />
+            </div>
           </div>
           <button
             type="button"
@@ -72,40 +74,46 @@ export function Passagens() {
           </button>
           <div className={styles.field}>
             <label className={styles.label}>Destino</label>
-            <input
-              className={styles.input}
-              placeholder="FLN"
-              maxLength={3}
-              value={destination}
-              onChange={e => setDestination(e.target.value.toUpperCase())}
-              required
-            />
+            <div className={styles.inputWrap}>
+              <input
+                className={styles.input}
+                placeholder="FLN"
+                maxLength={3}
+                value={destination}
+                onChange={e => setDestination(e.target.value.toUpperCase())}
+                required
+              />
+            </div>
           </div>
         </div>
 
         <div className={styles.row}>
           <div className={styles.field}>
             <label className={styles.label}>Data de ida</label>
-            <input
-              className={styles.input}
-              type="date"
-              min={today}
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              required
-            />
+            <div className={styles.inputWrap}>
+              <input
+                className={styles.input}
+                type="date"
+                min={today}
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                required
+              />
+            </div>
           </div>
           <div className={styles.field}>
             <label className={styles.label}>Passageiros</label>
-            <select
-              className={styles.input}
-              value={passengers}
-              onChange={e => setPassengers(Number(e.target.value))}
-            >
-              {[1,2,3,4,5,6,7,8,9].map(n => (
-                <option key={n} value={n}>{n} {n === 1 ? "adulto" : "adultos"}</option>
-              ))}
-            </select>
+            <div className={styles.selectWrap}>
+              <select
+                className={styles.input}
+                value={passengers}
+                onChange={e => setPassengers(Number(e.target.value))}
+              >
+                {[1,2,3,4,5,6,7,8,9].map(n => (
+                  <option key={n} value={n}>{n} {n === 1 ? "adulto" : "adultos"}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 

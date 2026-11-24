@@ -8,12 +8,16 @@ datasource db {
 }
 
 model Profile {
-  id        String   @id @db.Uuid
-  name      String
-  avatarUrl String?  @map("avatar_url")
-  email     String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id             String   @id @db.Uuid
+  name           String
+  avatarUrl      String?  @map("avatar_url")
+  email          String
+  nickname       String?
+  phone          String?
+  cpf            String?
+  emergencyEmail String?  @map("emergency_email")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   tripsCreated Trip[]
   memberships  TripMember[]
