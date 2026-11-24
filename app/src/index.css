@@ -2537,7 +2537,9 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink-2);
 }
 .gasto-valor { font-family: var(--font-display); font-weight: 600; font-size: 0.9rem; }
 
@@ -2666,6 +2668,24 @@ body::before {
   from { opacity: 0; transform: rotate(-45deg) translate(10px, -10px) scale(0.5); }
   to   { opacity: 1; transform: rotate(-45deg); }
 }
+/* Membros compartilhando localização (marcador do Leaflet, precisa ser global) */
+.tf-person {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #b9a4ff;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #06101f;
+}
+.tf-person-self { background: #3dd9ff; }
+
 .tf-popup-day { display: block; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.2rem; }
 .tf-popup-name { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; letter-spacing: -0.01em; }
 

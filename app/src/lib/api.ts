@@ -8,46 +8,174 @@ async function authHeaders(): Promise<Record<string, string>> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export interface FlightSegment {
-  departure: { iataCode: string; at: string };
-  arrival:   { iataCode: string; at: string };
-  carrierCode: string;
-  number: string;
-  numberOfStops: number;
+export interface FlightOption {
+  id: string;
+  best: boolean;
+  price: number | null;
+  totalMinutes: number | null;
+  stops: number;
+  airline: string;
+  airlineLogo: string | null;
+  flightNumbers: string[];
+  departure: { airport: string; time: string };
+  arrival:   { airport: string; time: string };
 }
 
-export interface FlightOffer {
-  id: string;
-  price: { total: string; currency: string };
-  itineraries: {
-    duration: string;
-    segments: FlightSegment[];
-  }[];
-  numberOfBookableSeats: number;
+export interface FlightSearchResult {
+  options: FlightOption[];
+  insights: {
+    lowestPrice: number | null;
+    level: "low" | "typical" | "high" | null;
+    typicalRange: [number, number] | null;
+  };
+  googleFlightsUrl: string | null;
+  fetchedAt: string;
 }
 
 export interface FlightSearchParams {
   origin: string;
   destination: string;
   date: string;
+  returnDate?: string;
   passengers: number;
 }
 
-export async function searchFlights(params: FlightSearchParams): Promise<FlightOffer[]> {
-  const headers = await authHeaders();
+// Erro com o status HTTP, para a tela diferenciar "não configurado" (503) de falha.
+export class ApiError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
+async function request<T>(path: string, init: RequestInit = {}, fallback = "Erro de conexão."): Promise<T> {
+  const headers = { ...(await authHeaders()), ...(init.body ? { "Content-Type": "application/json" } : {}) };
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, { ...init, headers: { ...headers, ...init.headers } });
+  } catch {
+    throw new ApiError("Sem conexão com o servidor.", 0);
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({})) as { error?: string };
+    throw new ApiError(err.error ?? fallback, res.status);
+  }
+  return await res.json() as T;
+}
+
+export async function searchFlights(params: FlightSearchParams): Promise<FlightSearchResult> {
   const qs = new URLSearchParams({
     origin:      params.origin.toUpperCase(),
     destination: params.destination.toUpperCase(),
     date:        params.date,
     passengers:  String(params.passengers),
   });
+  if (params.returnDate) qs.set("return_date", params.returnDate);
+  const data = await request<{ data: FlightSearchResult }>(`/flights/search?${qs}`, {}, "Erro ao buscar voos.");
+  return data.data;
+}
 
-  const res = await fetch(`${BASE}/flights/search?${qs}`, { headers });
-  if (!res.ok) {
-    const err = await res.json() as { error?: string };
-    throw new Error(err.error ?? "Erro ao buscar voos.");
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface ChatEvent {
+  text?: string;
+  tool?: string;
+  result?: string;
+  error?: string;
+}
+
+// O backend responde em SSE: cada evento "data: {...}" traz o uso de uma
+// ferramenta ou o texto final.
+export async function sendChat(tripId: string, messages: ChatMessage[], onEvent: (e: ChatEvent) => void): Promise<void> {
+  const headers = await authHeaders();
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/ai/chat`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ trip_id: tripId, messages }),
+    });
+  } catch {
+    throw new ApiError("Sem conexão com o servidor.", 0);
+  }
+  if (!res.ok || !res.body) {
+    const err = await res.json().catch(() => ({})) as { error?: string };
+    throw new ApiError(err.error ?? "O assistente não respondeu.", res.status);
   }
 
-  const data = await res.json() as { data: FlightOffer[] };
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const events = buffer.split("\n\n");
+    buffer = events.pop() ?? "";
+    for (const ev of events) {
+      const line = ev.trim();
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (payload === "[DONE]") return;
+      try { onEvent(JSON.parse(payload) as ChatEvent); } catch { /* evento parcial ou inválido */ }
+    }
+  }
+}
+
+export interface SuggestedItem {
+  title: string;
+  start_time: string | null;
+  notes: string | null;
+}
+
+export interface SuggestedDay {
+  day: string;
+  items: SuggestedItem[];
+}
+
+export async function suggestItinerary(
+  tripId: string,
+  opts: { interests: string[]; pace: "leve" | "moderado" | "intenso"; notes?: string },
+): Promise<SuggestedDay[]> {
+  const data = await request<{ data: { days: SuggestedDay[] } }>(
+    "/ai/suggest",
+    { method: "POST", body: JSON.stringify({ trip_id: tripId, ...opts }) },
+    "Não consegui gerar sugestões agora.",
+  );
+  return data.data.days;
+}
+
+export interface ExpenseDraft {
+  descricao: string;
+  valor: number;
+  categoria: string;
+  pago_por: string;
+  participantes: string[];
+  data: string;
+}
+
+export async function parseExpense(tripId: string, input: { text?: string; image?: string }): Promise<ExpenseDraft> {
+  const headers = await authHeaders();
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/ai/parse-expense`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ trip_id: tripId, ...input }),
+    });
+  } catch {
+    throw new Error("Sem conexão com o servidor. Lance o gasto manualmente.");
+  }
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(err.error ?? "Não consegui interpretar. Lance o gasto manualmente.");
+  }
+
+  const data = await res.json() as { data: ExpenseDraft };
   return data.data;
 }

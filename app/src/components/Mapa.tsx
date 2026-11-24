@@ -1,8 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useTrip } from "../hooks/useTrip";
+import { useTripRows } from "../hooks/useTripRows";
+import { formatDay, memberLabel, tripDays, type Trip } from "../lib/trip-context";
+import type { ItineraryItem } from "./RoteiroViagem/RoteiroViagem";
+import { CompartilharLocalizacao } from "./CompartilharLocalizacao/CompartilharLocalizacao";
+import { useSharedLocation } from "../hooks/useSharedLocation";
 
-const PINS: { name: string; lat: number; lng: number; day: string }[] = [
+interface Person {
+  id: string;
+  label: string;
+  lat: number;
+  lng: number;
+  self: boolean;
+}
+
+interface Pin {
+  name: string;
+  lat: number;
+  lng: number;
+  day: string;
+}
+
+const PINS: Pin[] = [
   { name: "Copacabana Blue Hotel",     lat: -22.9665, lng: -43.1844, day: "Terça 17/02" },
   { name: "Pizzaria Oggi",             lat: -22.9862, lng: -43.2176, day: "Terça 17/02" },
   { name: "Caminhada em Copacabana",   lat: -22.9711, lng: -43.1823, day: "Terça 17/02" },
@@ -36,6 +57,22 @@ const DAY_COLORS: Record<string, string> = {
 };
 
 
+const PALETTE = ["#3dd9ff", "#3ee08f", "#ffc861", "#ff8a5b", "#b9a4ff", "#ff6fae", "#7cf2e1"];
+
+// Nomes vêm do que o grupo digitou: montar o popup com textContent evita injeção de HTML.
+function popupContent(day: string, name: string, color: string): HTMLElement {
+  const wrap = document.createElement("div");
+  const d = document.createElement("span");
+  d.className = "tf-popup-day";
+  d.style.color = color;
+  d.textContent = day;
+  const n = document.createElement("span");
+  n.className = "tf-popup-name";
+  n.textContent = name;
+  wrap.append(d, n);
+  return wrap;
+}
+
 function makeIcon(order: number, color: string, delay: number) {
   return L.divIcon({
     className: "",
@@ -47,10 +84,79 @@ function makeIcon(order: number, color: string, delay: number) {
 }
 
 
+function personIcon(label: string, self: boolean) {
+  const el = document.createElement("div");
+  el.className = `tf-person${self ? " tf-person-self" : ""}`;
+  el.textContent = label.slice(0, 2).toUpperCase();
+  el.title = self ? "Você" : label;
+  return L.divIcon({ className: "", html: el, iconSize: [34, 34], iconAnchor: [17, 17] });
+}
+
 export function Mapa() {
+  const { activeTrip } = useTrip();
+  const { rows } = useTripRows<ItineraryItem>("itinerary_items", activeTrip?.id ?? null, [
+    { column: "day" }, { column: "position" },
+  ]);
+
+  // Memorizado: o mapa reposiciona a câmera sempre que os pins mudam de identidade.
+  const tripPins = useMemo(() => {
+    if (!activeTrip) return null;
+    const days = tripDays(activeTrip);
+    const dayLabel = (d: string) => `Dia ${days.indexOf(d) + 1} · ${formatDay(d, { day: "2-digit", month: "2-digit" })}`;
+    const pins: Pin[] = rows
+      .filter(r => r.lat !== null && r.lng !== null)
+      .map(r => ({ name: r.title, lat: r.lat as number, lng: r.lng as number, day: dayLabel(r.day) }));
+    const dayColors: Record<string, string> = {};
+    days.forEach((d, i) => {
+      const label = dayLabel(d);
+      if (pins.some(p => p.day === label)) dayColors[label] = PALETTE[i % PALETTE.length];
+    });
+    return { pins, dayColors };
+  }, [activeTrip, rows]);
+
+  if (!activeTrip || !tripPins) return <MapaView pins={PINS} dayColors={DAY_COLORS} />;
+  return <TripMapa key={activeTrip.id} trip={activeTrip} pins={tripPins.pins} dayColors={tripPins.dayColors} />;
+}
+
+function TripMapa({ trip, pins, dayColors }: { trip: Trip; pins: Pin[]; dayColors: Record<string, string> }) {
+  const { members } = useTrip();
+  const location = useSharedLocation(trip.id);
+
+  const people = useMemo<Person[]>(() => {
+    const list: Person[] = location.others.map(p => {
+      const m = members.find(x => x.user_id === p.userId);
+      return { id: p.userId, label: m ? memberLabel(m) : "?", lat: p.lat, lng: p.lng, self: false };
+    });
+    if (location.myPosition) list.push({ id: "me", label: "Eu", ...location.myPosition, self: true });
+    return list;
+  }, [location.others, location.myPosition, members]);
+
+  return (
+    <MapaView pins={pins} dayColors={dayColors} people={people}>
+      <CompartilharLocalizacao
+        tripEnd={trip.end_date}
+        ready={location.ready}
+        sharing={location.sharing}
+        shareUntil={location.shareUntil}
+        othersCount={location.others.length}
+        error={location.error}
+        onStart={location.start}
+        onStop={location.stop}
+      />
+    </MapaView>
+  );
+}
+
+function MapaView({ pins, dayColors, people = [], children }: {
+  pins: Pin[];
+  dayColors: Record<string, string>;
+  people?: Person[];
+  children?: ReactNode;
+}) {
   const mapRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
+  const peopleLayerRef = useRef<L.LayerGroup | null>(null);
   const [activeDay, setActiveDay] = useState<string | null>(null);
 
   useEffect(() => {
@@ -71,6 +177,7 @@ export function Mapa() {
     }).addTo(map);
 
     layerRef.current = L.layerGroup().addTo(map);
+    peopleLayerRef.current = L.layerGroup().addTo(map);
 
     return () => {
       map.remove();
@@ -84,16 +191,13 @@ export function Mapa() {
     if (!map || !layer) return;
     layer.clearLayers();
 
-    const visible = PINS.filter((p) => !activeDay || p.day === activeDay);
+    const visible = pins.filter((p) => !activeDay || p.day === activeDay);
     visible.forEach((pin, i) => {
-      const color = DAY_COLORS[pin.day] ?? "#3dd9ff";
-      const order = PINS.indexOf(pin) + 1;
+      const color = dayColors[pin.day] ?? "#3dd9ff";
+      const order = pins.indexOf(pin) + 1;
       L.marker([pin.lat, pin.lng], { icon: makeIcon(order, color, i * 35) })
         .addTo(layer)
-        .bindPopup(
-          `<span class="tf-popup-day" style="color:${color}">${pin.day}</span>` +
-          `<span class="tf-popup-name">${pin.name}</span>`
-        );
+        .bindPopup(popupContent(pin.day, pin.name, color));
     });
 
     if (visible.length > 0) {
@@ -103,7 +207,17 @@ export function Mapa() {
         maxZoom: 15,
       });
     }
-  }, [activeDay]);
+  }, [activeDay, pins, dayColors]);
+
+  // Pessoas ficam numa camada própria: atualizar posição não move a câmera.
+  useEffect(() => {
+    const layer = peopleLayerRef.current;
+    if (!layer) return;
+    layer.clearLayers();
+    people.forEach(p => {
+      L.marker([p.lat, p.lng], { icon: personIcon(p.label, p.self), zIndexOffset: 1000 }).addTo(layer);
+    });
+  }, [people]);
 
   return (
     <section className="mapa-section">
@@ -119,7 +233,7 @@ export function Mapa() {
         >
           Todos
         </button>
-        {Object.entries(DAY_COLORS).map(([day, color]) => (
+        {Object.entries(dayColors).map(([day, color]) => (
           <button
             key={day}
             className={`mapa-legend-item ${activeDay === day ? "is-active" : ""}`}
@@ -131,6 +245,14 @@ export function Mapa() {
           </button>
         ))}
       </div>
+
+      {children}
+
+      {pins.length === 0 && (
+        <p className="galeria-sub" style={{ textAlign: "center" }}>
+          Adicione lugares ao roteiro usando a busca para eles aparecerem aqui.
+        </p>
+      )}
 
       <div ref={mapRef} className="mapa-container" />
     </section>

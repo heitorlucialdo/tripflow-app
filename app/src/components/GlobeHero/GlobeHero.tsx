@@ -143,10 +143,14 @@ export default function GlobeHero() {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
-    controls.enableZoom    = true;
-    controls.minDistance   = 1.5;
-    controls.maxDistance   = 6;
+    // O globo ocupa a tela inteira: com zoom ligado, a rolagem do mouse em cima
+    // dele aumentava/diminuía o globo em vez de descer a página.
+    controls.enableZoom    = false;
+    controls.enablePan     = false;
     controls.autoRotate    = false;
+    // OrbitControls põe touch-action: none e prende o dedo. Com pan-y o arrasto
+    // vertical rola a página e o horizontal continua girando o globo.
+    renderer.domElement.style.touchAction = "pan-y";
 
     const onInteractStart = () => {
       autoRotate.current = false;
