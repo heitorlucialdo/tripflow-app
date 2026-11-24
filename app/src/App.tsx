@@ -55,7 +55,10 @@ export default function App() {
     </div>
   );
 
-  if (!user) return (
+  // Login desativado temporariamente só em desenvolvimento (localhost); produção continua exigindo login
+  const skipLogin = import.meta.env.DEV;
+
+  if (!user && !skipLogin) return (
     <Routes>
       <Route path="/login"       element={<Login />} />
       <Route path="/cadastro"    element={<Cadastro />} />
