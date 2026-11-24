@@ -132,7 +132,7 @@ function TripMapa({ trip, pins, dayColors }: { trip: Trip; pins: Pin[]; dayColor
   }, [location.others, location.myPosition, members]);
 
   return (
-    <MapaView pins={pins} dayColors={dayColors} people={people}>
+    <MapaView pins={pins} dayColors={dayColors} people={people} myPosition={location.myPosition}>
       <CompartilharLocalizacao
         tripEnd={trip.end_date}
         ready={location.ready}
@@ -147,17 +147,59 @@ function TripMapa({ trip, pins, dayColors }: { trip: Trip; pins: Pin[]; dayColor
   );
 }
 
-function MapaView({ pins, dayColors, people = [], children }: {
+const LOCATE_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
+
+function MapaView({ pins, dayColors, people = [], myPosition = null, children }: {
   pins: Pin[];
   dayColors: Record<string, string>;
   people?: Person[];
+  // Posição já conhecida (quem está compartilhando); evita pedir de novo ao GPS.
+  myPosition?: { lat: number; lng: number } | null;
   children?: ReactNode;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
   const peopleLayerRef = useRef<L.LayerGroup | null>(null);
+  const selfLayerRef = useRef<L.LayerGroup | null>(null);
+  const myPositionRef = useRef(myPosition);
+  const centerRef = useRef<() => void>(() => {});
   const [activeDay, setActiveDay] = useState<string | null>(null);
+  const [locError, setLocError] = useState<string | null>(null);
+
+  // Centraliza na pessoa. Sem compartilhamento ativo, pede a posição uma vez
+  // e só desenha no aparelho dela: nada é enviado ao grupo.
+  useEffect(() => {
+    myPositionRef.current = myPosition;
+    if (myPosition) selfLayerRef.current?.clearLayers();
+    centerRef.current = () => {
+      const map = instanceRef.current;
+      if (!map) return;
+      const fly = (lat: number, lng: number) =>
+        map.flyTo([lat, lng], Math.max(map.getZoom(), 16), { duration: 0.8 });
+
+      const known = myPositionRef.current;
+      if (known) { setLocError(null); fly(known.lat, known.lng); return; }
+
+      if (!("geolocation" in navigator)) { setLocError("Este aparelho não informa localização."); return; }
+      navigator.geolocation.getCurrentPosition(
+        p => {
+          const { latitude: lat, longitude: lng } = p.coords;
+          const layer = selfLayerRef.current;
+          if (layer && !myPositionRef.current) {
+            layer.clearLayers();
+            L.marker([lat, lng], { icon: personIcon("Eu", true), zIndexOffset: 1100 }).addTo(layer);
+          }
+          setLocError(null);
+          fly(lat, lng);
+        },
+        err => setLocError(err.code === err.PERMISSION_DENIED
+          ? "Permissão de localização negada. Libere nas configurações do navegador."
+          : "Não consegui obter sua localização agora."),
+        { enableHighAccuracy: true, timeout: 15_000, maximumAge: 30_000 },
+      );
+    };
+  }, [myPosition]);
 
   useEffect(() => {
     if (!mapRef.current || instanceRef.current) return;
@@ -168,6 +210,20 @@ function MapaView({ pins, dayColors, people = [], children }: {
       zoomControl: false,
     });
     L.control.zoom({ position: "bottomright" }).addTo(map);
+
+    const Locate = L.Control.extend({
+      onAdd() {
+        const btn = L.DomUtil.create("button", "tf-locate");
+        btn.type = "button";
+        btn.title = "Centralizar na minha localização";
+        btn.setAttribute("aria-label", "Centralizar na minha localização");
+        btn.innerHTML = LOCATE_ICON;
+        L.DomEvent.disableClickPropagation(btn);
+        L.DomEvent.on(btn, "click", () => centerRef.current());
+        return btn;
+      },
+    });
+    new Locate({ position: "bottomright" }).addTo(map);
     instanceRef.current = map;
 
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -178,6 +234,7 @@ function MapaView({ pins, dayColors, people = [], children }: {
 
     layerRef.current = L.layerGroup().addTo(map);
     peopleLayerRef.current = L.layerGroup().addTo(map);
+    selfLayerRef.current = L.layerGroup().addTo(map);
 
     return () => {
       map.remove();
@@ -255,6 +312,7 @@ function MapaView({ pins, dayColors, people = [], children }: {
       )}
 
       <div ref={mapRef} className="mapa-container" />
+      {locError && <p className="galeria-sub" role="alert" style={{ textAlign: "center" }}>{locError}</p>}
     </section>
   );
 }

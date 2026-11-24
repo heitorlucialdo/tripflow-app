@@ -2686,6 +2686,24 @@ body::before {
 }
 .tf-person-self { background: #3dd9ff; }
 
+/* Botão "centralizar em mim" (controle do Leaflet, precisa ser global) */
+.tf-locate {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px !important;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  color: var(--ink);
+  cursor: pointer;
+}
+.tf-locate:hover { color: #3dd9ff; }
+.tf-locate:focus-visible { outline: 2px solid #3dd9ff; outline-offset: 2px; }
+
 .tf-popup-day { display: block; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.2rem; }
 .tf-popup-name { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; letter-spacing: -0.01em; }
 
