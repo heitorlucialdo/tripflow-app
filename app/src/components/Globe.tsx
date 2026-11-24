@@ -218,10 +218,6 @@ export function Globe() {
       const scanAngle = (frame * 0.012) % (Math.PI * 2);
       ctx.save();
       ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
-      const scan = ctx.createConicalGradient
-        ? null // fallback below
-        : null;
-      void scan;
       // Draw scan wedge
       ctx.beginPath();
       ctx.moveTo(cx, cy);
