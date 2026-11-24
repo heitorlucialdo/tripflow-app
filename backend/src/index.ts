@@ -7,6 +7,8 @@ import { flightsRouter } from "./routes/flights.js";
 import { aiRouter } from "./routes/ai.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { requireAuth } from "./middleware/auth.js";
+import { flightsConfigured } from "./services/serpapi-flights.js";
+import { aiConfigured } from "./lib/ai.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -33,8 +35,9 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// Só booleanos: diz se cada integração tem chave, sem expor valor nenhum.
 app.get("/health", (_req, res) => {
-  res.json({ ok: true });
+  res.json({ ok: true, flights: flightsConfigured, ai: aiConfigured });
 });
 
 app.use("/flights", flightsRouter);

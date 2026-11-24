@@ -334,3 +334,15 @@
   font-weight: 600;
   text-decoration: none;
 }
+
+.hint,
+.hintBad {
+  display: block;
+  min-height: 1.1rem;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--color-muted, #888);
+}
+
+.hintBad { color: #ff8a5b; }

@@ -6,7 +6,8 @@ import { redis } from "../lib/redis.js";
 
 export const flightsRouter = Router();
 
-const iata = z.string().trim().toUpperCase().regex(/^[A-Z]{3}$/);
+// Um aeroporto ("CGB") ou até 3 da mesma cidade ("GRU,CGH,VCP"): a SerpApi busca em todos.
+const iata = z.string().trim().toUpperCase().regex(/^[A-Z]{3}(,[A-Z]{3}){0,2}$/);
 const day  = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 const querySchema = z.object({
