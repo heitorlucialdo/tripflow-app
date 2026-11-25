@@ -6,6 +6,9 @@ export interface AuthRequest extends Request {
 }
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
+  // Rotas com corpo grande autenticam antes do parser; não valida duas vezes.
+  if ((req as AuthRequest).userId) { next(); return; }
+
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
     res.status(401).json({ error: "Token ausente." });

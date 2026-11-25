@@ -13,9 +13,7 @@ model Profile {
   avatarUrl      String?  @map("avatar_url")
   email          String
   nickname       String?
-  phone          String?
-  cpf            String?
-  emergencyEmail String?  @map("emergency_email")
+  pixKey         String?  @map("pix_key")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
@@ -53,6 +51,9 @@ model Trip {
   expenses   Expense[]
   checklist  ChecklistItem[]
   locations  Location[]
+  itinerary  ItineraryItem[]
+  settlements Settlement[]
+  budget     BudgetItem[]
 
   @@map("trips")
 }
@@ -124,6 +125,7 @@ model Expense {
   paidBy       String   @map("paid_by") @db.Uuid
   participants String[] @db.Uuid
   date         DateTime @db.Date
+  createdBy    String?  @map("created_by") @db.Uuid
   createdAt    DateTime @default(now()) @map("created_at")
 
   trip  Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
@@ -152,6 +154,7 @@ model Location {
   userId    String   @map("user_id") @db.Uuid
   latEnc    String   @map("lat_enc")
   lngEnc    String   @map("lng_enc")
+  shareUntil DateTime @default(now()) @map("share_until")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   trip Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
@@ -159,4 +162,54 @@ model Location {
 
   @@unique([tripId, userId])
   @@map("locations")
+}
+
+model ItineraryItem {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tripId    String    @map("trip_id") @db.Uuid
+  day       DateTime  @db.Date
+  position  Int       @default(0)
+  title     String
+  startTime DateTime? @map("start_time") @db.Time
+  notes     String?
+  address   String?
+  lat       Float?
+  lng       Float?
+  createdBy String?   @map("created_by") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@map("itinerary_items")
+}
+
+model Settlement {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tripId      String    @map("trip_id") @db.Uuid
+  fromUser    String    @map("from_user") @db.Uuid
+  toUser      String    @map("to_user") @db.Uuid
+  amount      Decimal   @db.Decimal(10, 2)
+  confirmedAt DateTime? @map("confirmed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@map("settlements")
+}
+
+model BudgetItem {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tripId    String   @map("trip_id") @db.Uuid
+  category  String   @default("Outros")
+  title     String
+  amount    Decimal  @db.Decimal(10, 2)
+  split     String   @default("group")
+  status    String   @default("idea")
+  url       String?
+  createdBy String?  @map("created_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@map("budget_items")
 }

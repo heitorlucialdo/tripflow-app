@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../hooks/useProfile";
 import { supabase } from "../../lib/supabase";
+import { normalizePixKey } from "../../lib/pix";
 import styles from "./Perfil.module.css";
 
 interface Props {
@@ -12,7 +13,7 @@ type Section = "perfil" | "conta";
 
 export function Perfil({ onClose }: Props) {
   const { user, signOut } = useAuth();
-  const { saveProfile } = useProfile();
+  const { profile, saveProfile } = useProfile();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [section, setSection]           = useState<Section>("perfil");
@@ -24,12 +25,22 @@ export function Perfil({ onClose }: Props) {
   // Campos de perfil
   const [name,           setName]           = useState(user?.user_metadata?.full_name ?? "");
   const [nickname,       setNickname]       = useState(user?.user_metadata?.nickname ?? "");
-  const [phone,          setPhone]          = useState(user?.user_metadata?.phone ?? "");
-  const [cpf,            setCpf]            = useState(user?.user_metadata?.cpf ?? "");
-  const [emergencyEmail, setEmergencyEmail] = useState(user?.user_metadata?.emergency_email ?? "");
+  const [phone,          setPhone]          = useState("");
+  const [cpf,            setCpf]            = useState("");
+  const [emergencyEmail, setEmergencyEmail] = useState("");
   const [avatarUrl,      setAvatarUrl]      = useState<string>(
     (user?.user_metadata?.avatar_url as string) ?? ""
   );
+
+  const [pixKey,         setPixKey]         = useState("");
+
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.pix_key) setPixKey(profile.pix_key);
+    setPhone(profile.phone ?? "");
+    setCpf(profile.cpf ?? "");
+    setEmergencyEmail(profile.emergency_email ?? "");
+  }, [profile]);
 
   // Campos de conta
   const [newEmail,    setNewEmail]    = useState("");
@@ -76,11 +87,17 @@ export function Perfil({ onClose }: Props) {
   // ─── Salvar perfil ─────────────────────────────────────────
   async function handleSavePerfil(e: React.FormEvent) {
     e.preventDefault();
-    setError(null); setSaving(true);
+    setError(null);
 
-    // Salva no auth metadata (nome e avatar)
+    if (pixKey.trim() && !normalizePixKey(pixKey)) {
+      setError("Chave Pix inválida. Confira o formato.");
+      return;
+    }
+    setSaving(true);
+
+    // O metadata vai dentro do JWT: só nome e apelido, nunca dados pessoais.
     const { error: authErr } = await supabase.auth.updateUser({
-      data: { full_name: name, nickname, phone, emergency_email: emergencyEmail },
+      data: { full_name: name, nickname, phone: null, cpf: null, emergency_email: null },
     });
 
     // Salva campos extras na tabela profiles
@@ -90,6 +107,7 @@ export function Perfil({ onClose }: Props) {
       phone,
       cpf,
       emergency_email: emergencyEmail,
+      pix_key: pixKey.trim() || null,
     });
 
     setSaving(false);
@@ -240,6 +258,20 @@ export function Perfil({ onClose }: Props) {
                     placeholder="000.000.000-00" />
                 </div>
                 <p className={styles.fieldHint}>Usado apenas internamente, não é exibido para outros usuários</p>
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Chave Pix</label>
+                <div className={styles.inputWrap}>
+                  <input className={styles.input} value={pixKey}
+                    onChange={e => setPixKey(e.target.value)}
+                    placeholder="CPF, e-mail, celular com DDD ou chave aleatória" />
+                </div>
+                <p className={styles.fieldHint}>
+                  {pixKey.trim() && !normalizePixKey(pixKey)
+                    ? "Chave não reconhecida. Celular: use o DDD, ex. (11) 98888-7777."
+                    : "Visível só para o grupo das suas viagens, para te pagarem no acerto de contas"}
+                </p>
               </div>
 
               <button type="button" className={styles.signOutBtn} onClick={handleSignOut}>

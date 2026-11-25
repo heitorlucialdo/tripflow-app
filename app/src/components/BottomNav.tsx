@@ -1,10 +1,9 @@
 import { Icon, type IconName } from "./Icon";
 
-export type Tab = "home" | "fotos" | "gastos" | "checklist" | "memorias" | "aovivo" | "mapa" | "passagens" | "grupo" | "planejar";
+export type Tab = "home" | "fotos" | "gastos" | "checklist" | "memorias" | "aovivo" | "mapa" | "passagens" | "grupo" | "planejar" | "orcamento";
 
 type Item = { id: Tab; icon: IconName; label: string };
 
-// passagens volta na Fase 2: { id: "passagens", icon: "plane", label: "Voos" }
 const LEFT_ITEMS: Item[] = [
   { id: "gastos",    icon: "wallet",    label: "Gastos" },
   { id: "checklist", icon: "checklist", label: "Lista"  },
@@ -14,12 +13,28 @@ const RIGHT_ITEMS: Item[] = [
   { id: "mapa",     icon: "map",   label: "Mapa"     },
 ];
 
+// Numa viagem real só aparecem as telas que já funcionam com o grupo;
+// as demais seguem presas à viagem demo.
+const TRIP_LEFT: Item[] = [
+  { id: "gastos",    icon: "wallet",     label: "Gastos"    },
+  { id: "orcamento", icon: "calculator", label: "Orçamento" },
+];
+const TRIP_RIGHT: Item[] = [
+  { id: "mapa",  icon: "map",   label: "Mapa"  },
+  { id: "grupo", icon: "users", label: "Grupo" },
+];
+
 interface Props {
   tab: Tab;
   setTab: (t: Tab) => void;
+  tripMode?: boolean;
+  onAssistant: () => void;
 }
 
-export function BottomNav({ tab, setTab }: Props) {
+export function BottomNav({ tab, setTab, tripMode = false, onAssistant }: Props) {
+  const left  = tripMode ? TRIP_LEFT  : LEFT_ITEMS;
+  const right = tripMode ? TRIP_RIGHT : RIGHT_ITEMS;
+
   function go(t: Tab) {
     setTab(t);
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -46,15 +61,14 @@ export function BottomNav({ tab, setTab }: Props) {
   return (
     <nav className="bottom-nav" aria-label="Navegação principal">
       <div className="bnav-pill">
-        {LEFT_ITEMS.map(renderItem)}
+        {left.map(renderItem)}
 
-        <button className="bnav-center" aria-label="Assistente IA (em breve)" disabled>
+        <button className="bnav-center" aria-label="Abrir assistente" onClick={onAssistant}>
           <span className="bnav-center-ring" />
           <Icon name="sparkle" size={24} strokeWidth={1.6} />
-          <span className="bnav-soon">em breve</span>
         </button>
 
-        {RIGHT_ITEMS.map(renderItem)}
+        {right.map(renderItem)}
       </div>
     </nav>
   );

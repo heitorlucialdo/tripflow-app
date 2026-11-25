@@ -4,7 +4,8 @@ export type IconName =
   | "camera" | "wallet" | "checklist" | "film" | "radar" | "map"
   | "sparkle" | "plane" | "users" | "user" | "sun" | "moon"
   | "chevron" | "close" | "download" | "share" | "pin"
-  | "fork" | "glass" | "coffee" | "music" | "locate";
+  | "fork" | "glass" | "coffee" | "music" | "locate"
+  | "calculator" | "mic" | "plus" | "trash" | "up" | "down" | "link" | "calendar";
 
 const PATHS: Record<IconName, ReactElement> = {
   camera: (
@@ -137,6 +138,40 @@ const PATHS: Record<IconName, ReactElement> = {
     <>
       <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" />
       <circle cx="12" cy="10" r="2.4" />
+    </>
+  ),
+  calculator: (
+    <>
+      <rect x="5.5" y="3.5" width="13" height="17" rx="2.5" />
+      <path d="M8.5 7.5h7" />
+      <path d="M9 12h.01M12 12h.01M15 12h.01M9 15.5h.01M12 15.5h.01M15 15.5h.01" strokeWidth="2.2" />
+    </>
+  ),
+  mic: (
+    <>
+      <rect x="9" y="3.5" width="6" height="11" rx="3" />
+      <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
+  trash: (
+    <>
+      <path d="M4.5 7h15M9.5 7V4.5h5V7" />
+      <path d="M6.5 7l.8 11.5A2 2 0 0 0 9.3 20.5h5.4a2 2 0 0 0 2-2L17.5 7" />
+    </>
+  ),
+  up: <path d="m6 14.5 6-6 6 6" />,
+  down: <path d="m6 9.5 6 6 6-6" />,
+  link: (
+    <>
+      <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+      <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+    </>
+  ),
+  calendar: (
+    <>
+      <rect x="4" y="5.5" width="16" height="14.5" rx="2.5" />
+      <path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" />
     </>
   ),
 };

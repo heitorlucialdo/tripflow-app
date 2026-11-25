@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import styles from "./MenuLateral.module.css";
 import { useAuth } from "../../hooks/useAuth";
 import { Icon } from "../Icon";
+import { useTrip } from "../../hooks/useTrip";
 
 interface Props {
   open: boolean;
@@ -12,10 +13,13 @@ interface Props {
   onOpenPlanejar: () => void;
   onOpenFotos: () => void;
   onOpenMemorias: () => void;
+  onOpenViagens: () => void;
+  onOpenPassagens: () => void;
 }
 
-export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenComoVai, onOpenPlanejar, onOpenFotos, onOpenMemorias }: Props) {
+export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenComoVai, onOpenPlanejar, onOpenFotos, onOpenMemorias, onOpenViagens, onOpenPassagens }: Props) {
   const { user } = useAuth();
+  const { activeTrip, demoMode } = useTrip();
 
   const avatar   = user?.user_metadata?.avatar_url as string | undefined;
   const name     = user?.user_metadata?.full_name as string | undefined;
@@ -60,6 +64,15 @@ export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenCo
 
         {/* Itens do menu */}
         <nav className={styles.nav}>
+          <button className={styles.item} onClick={() => handle(onOpenViagens)}>
+            <span className={styles.itemIcon}><Icon name="calendar" size={20} /></span>
+            <div className={styles.itemText}>
+              <span className={styles.itemLabel}>Minhas viagens</span>
+              <span className={styles.itemDesc}>{activeTrip ? activeTrip.name : demoMode ? "Exemplo" : "Nenhuma ainda"} · trocar ou criar</span>
+            </div>
+            <Icon name="chevron" size={16} className={styles.chevron} />
+          </button>
+
           <button className={styles.item} onClick={() => handle(onOpenPlanejar)}>
             <span className={styles.itemIcon}><Icon name="pin" size={20} /></span>
             <div className={styles.itemText}>
@@ -88,10 +101,19 @@ export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenCo
           </button>
 
           <button className={styles.item} onClick={() => handle(onOpenComoVai)}>
-            <span className={styles.itemIcon}><Icon name="plane" size={20} /></span>
+            <span className={styles.itemIcon}><Icon name="radar" size={20} /></span>
             <div className={styles.itemText}>
               <span className={styles.itemLabel}>Como Vai</span>
-              <span className={styles.itemDesc}>Resumo da sua viagem</span>
+              <span className={styles.itemDesc}>Resumo: dias, gastos e próximo passo</span>
+            </div>
+            <Icon name="chevron" size={16} className={styles.chevron} />
+          </button>
+
+          <button className={styles.item} onClick={() => handle(onOpenPassagens)}>
+            <span className={styles.itemIcon}><Icon name="plane" size={20} /></span>
+            <div className={styles.itemText}>
+              <span className={styles.itemLabel}>Passagens</span>
+              <span className={styles.itemDesc}>Buscar voos e comparar preços</span>
             </div>
             <Icon name="chevron" size={16} className={styles.chevron} />
           </button>
@@ -117,7 +139,7 @@ export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenCo
 
         <div className={styles.divider} />
 
-        <div className={styles.version}>TripFlow · versão demo</div>
+        <div className={styles.version}>TripFlow{demoMode ? " · exemplo" : ""}</div>
       </aside>
     </>
   );

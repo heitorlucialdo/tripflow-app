@@ -1,0 +1,103 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  /* Mesma largura do mapa logo abaixo (.mapa-container) */
+  max-width: 1100px;
+  margin: 0 auto 0.9rem;
+  padding: 0.9rem;
+  border-radius: 16px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.title {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.meta,
+.privacy {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3ee08f;
+  box-shadow: 0 0 0 4px rgba(62, 224, 143, 0.2);
+}
+
+.startBtn,
+.stopBtn,
+.choices button {
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.startBtn {
+  border: none;
+  background: var(--gradient);
+  color: #fff;
+}
+
+.startBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.stopBtn {
+  border: 1px solid var(--sunset, #ff8a5b);
+  background: transparent;
+  color: var(--sunset, #ff8a5b);
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+.choices button {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+}
+
+.choices .cancel { color: var(--ink-3); }
+
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--sunset, #ff8a5b);
+}
