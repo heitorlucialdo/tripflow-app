@@ -1,17 +1,15 @@
 import { Icon, type IconName } from "./Icon";
 
-export type Tab = "home" | "fotos" | "gastos" | "checklist" | "memorias" | "aovivo" | "mapa" | "passagens" | "grupo";
+export type Tab = "home" | "fotos" | "gastos" | "checklist" | "memorias" | "aovivo" | "mapa" | "passagens" | "grupo" | "planejar";
 
 type Item = { id: Tab; icon: IconName; label: string };
 
 // passagens volta na Fase 2: { id: "passagens", icon: "plane", label: "Voos" }
 const LEFT_ITEMS: Item[] = [
-  { id: "fotos",     icon: "camera",    label: "Fotos"  },
   { id: "gastos",    icon: "wallet",    label: "Gastos" },
   { id: "checklist", icon: "checklist", label: "Lista"  },
 ];
 const RIGHT_ITEMS: Item[] = [
-  { id: "memorias", icon: "film",  label: "Memórias" },
   { id: "aovivo",   icon: "radar", label: "Ao Vivo"  },
   { id: "mapa",     icon: "map",   label: "Mapa"     },
 ];

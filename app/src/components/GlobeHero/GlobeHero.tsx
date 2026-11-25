@@ -19,11 +19,20 @@ function latLonToVec3(lat: number, lon: number, radius: number): THREE.Vector3 {
   );
 }
 
-const CUIABA_LAT = -15.6014, CUIABA_LON = -56.0979;
-const RIO_LAT    = -22.9068, RIO_LON    = -43.1729;
-const GLOBE_R    = 1;
+const GLOBE_R = 1;
 
-export default function GlobeHero() {
+export interface GlobePoint {
+  lat: number;
+  lng: number;
+  name: string;
+}
+
+interface Props {
+  from: GlobePoint;
+  to: GlobePoint;
+}
+
+export default function GlobeHero({ from, to }: Props) {
   const wrapperRef  = useRef<HTMLDivElement>(null);
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoRotate  = useRef(true);
@@ -111,19 +120,29 @@ export default function GlobeHero() {
     // ── City markers ──
     const markerGeo = new THREE.SphereGeometry(0.022, 16, 16);
 
-    const cuiabaPos  = latLonToVec3(CUIABA_LAT, CUIABA_LON, GLOBE_R + 0.01);
+    const cuiabaPos  = latLonToVec3(from.lat, from.lng, GLOBE_R + 0.01);
     const cuiabaMesh = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffd700 }));
     cuiabaMesh.position.copy(cuiabaPos);
     globeGroup.add(cuiabaMesh);
 
-    const rioPos  = latLonToVec3(RIO_LAT, RIO_LON, GLOBE_R + 0.01);
+    const rioPos  = latLonToVec3(to.lat, to.lng, GLOBE_R + 0.01);
     const rioMesh = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff4444 }));
     rioMesh.position.copy(rioPos);
     globeGroup.add(rioMesh);
 
     // ── Flight arc (in group — rotates with globe) ──
     const midPoint     = new THREE.Vector3().addVectors(cuiabaPos, rioPos).multiplyScalar(0.5);
-    const controlPoint = midPoint.clone().normalize().multiplyScalar(GLOBE_R * 1.4);
+    // Arco mais alto para rotas longas, mais rente ao globo para rotas curtas
+    const arcHeight    = GLOBE_R * (1.05 + 0.5 * cuiabaPos.angleTo(rioPos));
+    const controlPoint = midPoint.clone().normalize().multiplyScalar(arcHeight);
+
+    // Começa com a rota de frente para a câmera: gira o globo pela longitude e inclina a câmera pela latitude
+    const midLat = (from.lat + to.lat) / 2;
+    const midLng = (from.lng + to.lng) / 2;
+    globeGroup.rotation.y = (-(midLng + 90) * Math.PI) / 180;
+    const tilt = (midLat * Math.PI) / 180;
+    camera.position.set(0, 3 * Math.sin(tilt), 3 * Math.cos(tilt));
+    camera.lookAt(0, 0, 0);
     const curve        = new THREE.QuadraticBezierCurve3(cuiabaPos.clone(), controlPoint, rioPos.clone());
     const arcPoints    = curve.getPoints(100);
 
@@ -255,13 +274,13 @@ export default function GlobeHero() {
       arcGeo.dispose();   arcMat.dispose();
       if (wrapper.contains(renderer.domElement)) wrapper.removeChild(renderer.domElement);
     };
-  }, []);
+  }, [from.lat, from.lng, to.lat, to.lng]);
 
   return (
     <div
       ref={wrapperRef}
       className={styles.wrapper}
-      aria-label="Globo 3D mostrando rota de Cuiabá ao Rio de Janeiro"
+      aria-label={`Globo 3D mostrando a rota de ${from.name} até ${to.name}`}
       role="img"
     >
       {cuiabaLabel.visible && (
@@ -269,7 +288,7 @@ export default function GlobeHero() {
           className={styles.label}
           style={{ left: cuiabaLabel.x, top: cuiabaLabel.y - 20 }}
         >
-          CUIABÁ ✈
+          {from.name.toUpperCase()}
         </span>
       )}
       {rioLabel.visible && (
@@ -277,7 +296,7 @@ export default function GlobeHero() {
           className={styles.label}
           style={{ left: rioLabel.x, top: rioLabel.y - 20 }}
         >
-          RIO DE JANEIRO 🏖
+          {to.name.toUpperCase()}
         </span>
       )}
 

@@ -24,9 +24,12 @@ import { NovaSenha } from "./pages/NovaSenha/NovaSenha";
 import { Passagens } from "./pages/Passagens/Passagens";
 import { Perfil } from "./pages/Perfil/Perfil";
 import { Grupo } from "./pages/Grupo/Grupo";
+import { Planejar } from "./pages/Planejar/Planejar";
+import { Onboarding } from "./pages/Onboarding/Onboarding";
+import { useTripRoute } from "./hooks/useTripRoute";
 import { DAYS } from "./data";
 
-const TABS: Tab[] = ["home", "fotos", "gastos", "checklist", "memorias", "aovivo", "mapa"];
+const TABS: Tab[] = ["home", "fotos", "gastos", "checklist", "memorias", "aovivo", "mapa", "planejar"];
 
 function initialTab(): Tab {
   const param = new URLSearchParams(window.location.search).get("tab");
@@ -46,6 +49,14 @@ export default function App() {
   const [, setShowComoVai]            = useState(false);
   const { notes, save }               = useNotes();
   const { user, loading }             = useAuth();
+  const { route, setRoute }           = useTripRoute();
+  const [editRoute, setEditRoute]     = useState(false);
+
+  function openTab(t: Tab) {
+    setTab(t);
+    window.scrollTo({ top: 0 });
+  }
+  const openPlanner = () => openTab("planejar");
 
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
 
@@ -67,6 +78,16 @@ export default function App() {
     </Routes>
   );
 
+  // Primeiro passo de todo usuário: de onde sai e para onde vai
+  if (!route || editRoute) return (
+    <Onboarding
+      initial={route}
+      onDone={(r) => { setRoute(r); setEditRoute(false); setTab("home"); }}
+    />
+  );
+
+  const isDemoTrip = /rio de janeiro/i.test(route.destination.name);
+
   return (
     <>
       {/* Hamburguer — top-left, sempre visível */}
@@ -87,21 +108,33 @@ export default function App() {
         onOpenPerfil={() => setShowPerfil(true)}
         onOpenGrupo={() => setShowGrupo(true)}
         onOpenComoVai={() => setShowComoVai(true)}
+        onOpenPlanejar={openPlanner}
+        onOpenFotos={() => openTab("fotos")}
+        onOpenMemorias={() => openTab("memorias")}
       />
 
       {/* HOME — Hero + Roteiro + Resumo */}
       {tab === "home" && (
         <>
-          <Hero />
-          <section id="itinerary" className="itinerary">
-            <h2 className="section-title">O roteiro</h2>
-            {DAYS.map((day, i) => (
-              <DayBlock key={day.num} day={day} index={i} onPlaceClick={setActivePlace} />
-            ))}
-          </section>
-          <Resumo />
+          <Hero route={route} onPlan={openPlanner} onChangeRoute={() => setEditRoute(true)} />
+          {isDemoTrip ? (
+            <>
+              <section id="itinerary" className="itinerary">
+                <h2 className="section-title">O roteiro</h2>
+                {DAYS.map((day, i) => (
+                  <DayBlock key={day.num} day={day} index={i} onPlaceClick={setActivePlace} />
+                ))}
+              </section>
+              <Resumo />
+            </>
+          ) : (
+            <div className="home-plan-cta">
+              <p>Ainda não tem roteiro para {route.destination.name}. Escolha onde vai ficar e a gente sugere passeios, restaurantes e baladas.</p>
+              <button className="hero-plan" onClick={openPlanner}>Planejar agora</button>
+            </div>
+          )}
           <footer className="site-footer">
-            TripFlow · Viagem dos Amigos — Rio de Janeiro, fev 2026
+            TripFlow · {route.origin.name} → {route.destination.name}
           </footer>
         </>
       )}
@@ -113,6 +146,7 @@ export default function App() {
       {tab === "checklist" && <div className="tab-page"><Checklist /></div>}
       {tab === "memorias"  && <div className="tab-page"><Galeria /></div>}
       {tab === "aovivo"    && <div className="tab-page"><ModoAoVivo /></div>}
+      {tab === "planejar"  && <div className="tab-page"><Planejar destino={route.destination} /></div>}
       {tab === "mapa"      && <div className="tab-page"><Mapa key="mapa-tab" /></div>}
 
       <BottomNav tab={tab} setTab={setTab} />

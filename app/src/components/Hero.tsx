@@ -1,6 +1,8 @@
 import { useState } from "react";
 import GlobeHero from "./GlobeHero/GlobeHero";
 import { Icon } from "./Icon";
+import { distanceKm } from "../lib/places";
+import type { TripRoute } from "../hooks/useTripRoute";
 
 const TRIP_START = new Date("2026-02-16T00:00:00-03:00");
 const TRIP_END   = new Date("2026-02-22T23:59:59-03:00");
@@ -18,8 +20,18 @@ function getDaysBadge() {
   return { label: `Concluída há ${days} dias`, tone: "past" };
 }
 
-export function Hero() {
-  const badge = getDaysBadge();
+interface Props {
+  route: TripRoute;
+  onPlan: () => void;
+  onChangeRoute: () => void;
+}
+
+export function Hero({ route, onPlan, onChangeRoute }: Props) {
+  const { origin, destination } = route;
+  // O roteiro demo (data.ts) é do Rio; para outros destinos mostramos o estado de planejamento
+  const isDemo = /rio de janeiro/i.test(destination.name);
+  const km = Math.round(distanceKm(origin, destination));
+  const badge = isDemo ? getDaysBadge() : { label: `Planejando · ${km.toLocaleString("pt-BR")} km`, tone: "soon" };
   const [copied, setCopied] = useState(false);
 
   function copyLink() {
@@ -41,17 +53,26 @@ export function Hero() {
         <h1 className="hero-title">
           Viagem<br /><em>dos Amigos</em>
         </h1>
-        <div className="hero-route">
-          <span><b>CGB</b>Cuiabá</span>
+        <div className="hero-route hero-route--names">
+          <span><b>{origin.name}</b>Origem</span>
           <span className="hero-route-line"><Icon name="plane" size={16} /></span>
-          <span><b>GIG</b>Rio de Janeiro</span>
+          <span><b>{destination.name}</b>Destino</span>
         </div>
-        <p className="hero-dates">16 — 22 fev 2026 · 4 amigos</p>
+        <p className="hero-dates">
+          {isDemo ? "16 — 22 fev 2026 · 4 amigos" : "Monte o roteiro com passeios, restaurantes e baladas"}
+          {" · "}
+          <button className="hero-change" onClick={onChangeRoute}>trocar</button>
+        </p>
+
+        <button className="hero-plan" onClick={onPlan}>
+          <Icon name="sparkle" size={18} />
+          Planejar roteiro em {destination.name}
+        </button>
 
         <div className="hero-share">
           <a
             className="share-btn share-whatsapp"
-            href={`https://wa.me/?text=${encodeURIComponent("Olha o roteiro da nossa viagem dos amigos pro Rio!\n" + window.location.href)}`}
+            href={`https://wa.me/?text=${encodeURIComponent(`Olha o roteiro da nossa viagem para ${destination.name}!\n` + window.location.href)}`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -70,7 +91,7 @@ export function Hero() {
       </div>
 
       {/* Globo Three.js — renderiza por baixo do overlay */}
-      <GlobeHero />
+      <GlobeHero from={origin} to={destination} />
 
     </section>
   );

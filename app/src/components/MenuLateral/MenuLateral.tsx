@@ -9,9 +9,12 @@ interface Props {
   onOpenPerfil: () => void;
   onOpenGrupo: () => void;
   onOpenComoVai: () => void;
+  onOpenPlanejar: () => void;
+  onOpenFotos: () => void;
+  onOpenMemorias: () => void;
 }
 
-export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenComoVai }: Props) {
+export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenComoVai, onOpenPlanejar, onOpenFotos, onOpenMemorias }: Props) {
   const { user } = useAuth();
 
   const avatar   = user?.user_metadata?.avatar_url as string | undefined;
@@ -57,6 +60,33 @@ export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenCo
 
         {/* Itens do menu */}
         <nav className={styles.nav}>
+          <button className={styles.item} onClick={() => handle(onOpenPlanejar)}>
+            <span className={styles.itemIcon}><Icon name="pin" size={20} /></span>
+            <div className={styles.itemText}>
+              <span className={styles.itemLabel}>Planejar viagem</span>
+              <span className={styles.itemDesc}>Destino, hospedagem e roteiros</span>
+            </div>
+            <Icon name="chevron" size={16} className={styles.chevron} />
+          </button>
+
+          <button className={styles.item} onClick={() => handle(onOpenFotos)}>
+            <span className={styles.itemIcon}><Icon name="camera" size={20} /></span>
+            <div className={styles.itemText}>
+              <span className={styles.itemLabel}>Minhas fotos</span>
+              <span className={styles.itemDesc}>Fotos tiradas na viagem</span>
+            </div>
+            <Icon name="chevron" size={16} className={styles.chevron} />
+          </button>
+
+          <button className={styles.item} onClick={() => handle(onOpenMemorias)}>
+            <span className={styles.itemIcon}><Icon name="film" size={20} /></span>
+            <div className={styles.itemText}>
+              <span className={styles.itemLabel}>Memórias</span>
+              <span className={styles.itemDesc}>Galeria da viagem</span>
+            </div>
+            <Icon name="chevron" size={16} className={styles.chevron} />
+          </button>
+
           <button className={styles.item} onClick={() => handle(onOpenComoVai)}>
             <span className={styles.itemIcon}><Icon name="plane" size={20} /></span>
             <div className={styles.itemText}>
