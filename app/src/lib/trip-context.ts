@@ -8,7 +8,19 @@ export interface Trip {
   start_date: string;
   end_date: string;
   created_by: string;
+  origin_lat: number | null;
+  origin_lng: number | null;
+  destination_lat: number | null;
+  destination_lng: number | null;
+  lodging: string | null;
+  hours_per_day: number;
+  tier: TripTier | null;
 }
+
+export type TripTier = "economico" | "medio" | "premium" | "personalizado";
+
+export const TRIP_COLUMNS =
+  "id, name, origin, destination, start_date, end_date, created_by, origin_lat, origin_lng, destination_lat, destination_lng, lodging, hours_per_day, tier";
 
 export interface TripMember {
   user_id: string;
@@ -25,7 +37,15 @@ export interface NewTrip {
   destination: string;
   start_date: string;
   end_date: string;
+  origin_lat?: number | null;
+  origin_lng?: number | null;
+  destination_lat?: number | null;
+  destination_lng?: number | null;
+  lodging?: string | null;
+  hours_per_day?: number;
 }
+
+export type TripPatch = Partial<Omit<Trip, "id" | "created_by">>;
 
 export interface TripContextValue {
   trips: Trip[];
@@ -37,6 +57,7 @@ export interface TripContextValue {
   demoMode: boolean;
   selectTrip: (id: string | null) => void;
   createTrip: (input: NewTrip) => Promise<Trip>;
+  updateTrip: (id: string, patch: TripPatch) => Promise<void>;
   reloadTrips: () => Promise<void>;
 }
 

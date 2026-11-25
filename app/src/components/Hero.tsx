@@ -2,7 +2,12 @@ import { useState } from "react";
 import GlobeHero from "./GlobeHero/GlobeHero";
 import { Icon } from "./Icon";
 import { distanceKm } from "../lib/places";
-import type { TripRoute } from "../hooks/useTripRoute";
+import type { GeoResult } from "../lib/places";
+
+interface TripRoute {
+  origin: GeoResult;
+  destination: GeoResult;
+}
 
 const TRIP_START = new Date("2026-02-16T00:00:00-03:00");
 const TRIP_END   = new Date("2026-02-22T23:59:59-03:00");
@@ -66,7 +71,7 @@ export function Hero({ route, onPlan, onChangeRoute }: Props) {
 
         <button className="hero-plan" onClick={onPlan}>
           <Icon name="sparkle" size={18} />
-          Planejar roteiro em {destination.name}
+          Criar minha viagem
         </button>
 
         <div className="hero-share">

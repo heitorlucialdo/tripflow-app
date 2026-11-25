@@ -193,3 +193,91 @@
   box-shadow: none;
   cursor: not-allowed;
 }
+
+.screen { max-width: 640px; gap: 1.25rem; }
+
+.top { display: flex; align-items: center; justify-content: space-between; }
+
+.close {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid var(--line-strong); background: var(--surface-1);
+  color: var(--ink); display: grid; place-items: center; cursor: pointer;
+}
+
+.steps {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem;
+}
+
+.steps li {
+  display: flex; flex-direction: column; gap: 0.35rem;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.steps li::before {
+  content: ""; height: 4px; border-radius: 4px; background: var(--surface-3);
+}
+
+.steps li[data-state="done"]::before,
+.steps li[data-state="on"]::before { background: var(--gradient); }
+.steps li[data-state="on"] { color: var(--sky); }
+.steps li span { display: none; }
+
+.inviteTeaser {
+  display: flex; align-items: center; gap: 0.8rem; text-align: left;
+  background: rgba(61, 217, 255, 0.07); border: 1px dashed rgba(61, 217, 255, 0.4);
+  border-radius: 18px; padding: 0.85rem 1rem; color: var(--ink); font: inherit; cursor: default;
+}
+
+.inviteTeaser span:last-child { display: flex; flex-direction: column; gap: 0.15rem; }
+.inviteTeaser small { color: var(--ink-2); font-size: 0.78rem; }
+
+.inviteIcons {
+  width: 40px; height: 40px; flex-shrink: 0; border-radius: 12px;
+  background: var(--gradient); color: #fff; display: grid; place-items: center;
+}
+
+.field { display: flex; flex-direction: column; gap: 0.5rem; }
+.help { color: var(--ink-2); font-size: 0.78rem; }
+
+.input {
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px;
+  padding: 0.8rem 1rem; color: var(--ink); font: inherit; color-scheme: dark;
+}
+
+.stepper {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 0.35rem;
+}
+
+.stepper button {
+  width: 44px; height: 44px; border-radius: 10px; border: none;
+  background: var(--surface-3); color: var(--sky); font-size: 1.4rem; font-weight: 700; cursor: pointer;
+}
+
+.stepper strong { font-family: var(--font-display); color: var(--ink); font-size: 1.1rem; }
+
+.chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+.chip, .chipOn {
+  flex: 1 0 56px; padding: 0.7rem 0; border-radius: 12px; font: inherit; font-weight: 800; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--ink);
+}
+
+.chipOn { background: var(--gradient); color: #fff; border-color: transparent; }
+
+.row { display: flex; gap: 0.6rem; }
+.row .cta { flex: 1; margin-top: 0; }
+
+.back {
+  padding: 0 1.2rem; border-radius: 16px; border: 1px solid var(--line-strong);
+  background: transparent; color: var(--ink); font: inherit; font-weight: 700; cursor: pointer;
+}
+
+.skip {
+  background: none; border: none; color: var(--ink-2); font: inherit; font-size: 0.85rem;
+  text-decoration: underline; cursor: pointer; align-self: center;
+}
+
+.error { margin: 0; color: #ff6b6b; font-size: 0.85rem; }

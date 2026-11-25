@@ -10,14 +10,14 @@ interface Props {
   onOpenPerfil: () => void;
   onOpenGrupo: () => void;
   onOpenComoVai: () => void;
-  onOpenPlanejar: () => void;
+  onOpenVotacao: () => void;
   onOpenFotos: () => void;
   onOpenMemorias: () => void;
   onOpenViagens: () => void;
   onOpenPassagens: () => void;
 }
 
-export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenComoVai, onOpenPlanejar, onOpenFotos, onOpenMemorias, onOpenViagens, onOpenPassagens }: Props) {
+export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenComoVai, onOpenVotacao, onOpenFotos, onOpenMemorias, onOpenViagens, onOpenPassagens }: Props) {
   const { user } = useAuth();
   const { activeTrip, demoMode } = useTrip();
 
@@ -73,11 +73,11 @@ export function MenuLateral({ open, onClose, onOpenPerfil, onOpenGrupo, onOpenCo
             <Icon name="chevron" size={16} className={styles.chevron} />
           </button>
 
-          <button className={styles.item} onClick={() => handle(onOpenPlanejar)}>
-            <span className={styles.itemIcon}><Icon name="pin" size={20} /></span>
+          <button className={styles.item} onClick={() => handle(onOpenVotacao)}>
+            <span className={styles.itemIcon}><Icon name="checklist" size={20} /></span>
             <div className={styles.itemText}>
-              <span className={styles.itemLabel}>Planejar viagem</span>
-              <span className={styles.itemDesc}>Destino, hospedagem e roteiros</span>
+              <span className={styles.itemLabel}>Votação</span>
+              <span className={styles.itemDesc}>Quem vai em cada passeio</span>
             </div>
             <Icon name="chevron" size={16} className={styles.chevron} />
           </button>

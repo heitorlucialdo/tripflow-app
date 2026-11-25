@@ -28,19 +28,27 @@ import { NovaSenha } from "./pages/NovaSenha/NovaSenha";
 import { Passagens } from "./pages/Passagens/Passagens";
 import { Perfil } from "./pages/Perfil/Perfil";
 import { Grupo } from "./pages/Grupo/Grupo";
-import { Planejar } from "./pages/Planejar/Planejar";
-import { Onboarding } from "./pages/Onboarding/Onboarding";
-import { useTripRoute } from "./hooks/useTripRoute";
+import { NovaViagem } from "./pages/NovaViagem/NovaViagem";
+import { Votacao } from "./pages/Votacao/Votacao";
+import { EstiloRoteiro } from "./components/EstiloRoteiro/EstiloRoteiro";
+import { AssistenteRoteiro } from "./components/AssistenteRoteiro/AssistenteRoteiro";
+import { Sheet } from "./components/Sheet/Sheet";
 import { Viagens } from "./pages/Viagens/Viagens";
 import { Convite } from "./pages/Convite/Convite";
 import { ComoVai } from "./components/ComoVai/ComoVai";
 import { Assistente } from "./components/Assistente/Assistente";
 import { DAYS } from "./data";
 import { PENDING_INVITE_KEY, DEMO_TRIP_ID } from "./lib/trip-context";
-import { BoasVindas, DemoAviso } from "./components/BoasVindas/BoasVindas";
+import { DemoAviso } from "./components/BoasVindas/BoasVindas";
 import "./App.css";
 
-const TABS: Tab[] = ["home", "fotos", "gastos", "checklist", "memorias", "aovivo", "mapa", "planejar", "orcamento", "passagens"];
+const TABS: Tab[] = ["home", "fotos", "gastos", "checklist", "memorias", "aovivo", "mapa", "votacao", "orcamento", "passagens"];
+
+// Rota da viagem demo (data.ts), mostrada para quem ainda não criou viagem
+const DEMO_ROUTE = {
+  origin:      { label: "Cuiabá, Mato Grosso", name: "Cuiabá", lat: -15.601, lng: -56.097 },
+  destination: { label: "Rio de Janeiro, RJ", name: "Rio de Janeiro", lat: -22.906, lng: -43.172 },
+};
 const DEMO_ONLY_TABS: Tab[] = ["fotos", "checklist", "memorias", "aovivo"];
 
 function initialTab(): Tab {
@@ -66,19 +74,18 @@ export default function App() {
   const [showPerfil, setShowPerfil]   = useState(false);
   const [showGrupo, setShowGrupo]     = useState(false);
   const [showViagens, setShowViagens] = useState(false);
-  const [viagensCreating, setViagensCreating] = useState(false);
   const [showComoVai, setShowComoVai] = useState(false);
   const [showAssistente, setShowAssistente] = useState(false);
   const { notes, save }               = useNotes();
   const { user, loading }             = useAuth();
-  const { route, setRoute }           = useTripRoute();
-  const [editRoute, setEditRoute]     = useState(false);
+  const [showNova, setShowNova]       = useState(false);
+  const [showEstilo, setShowEstilo]   = useState(false);
+  const [showAjuste, setShowAjuste]   = useState(false);
 
   function openTab(t: Tab) {
     setTab(t);
     window.scrollTo({ top: 0 });
   }
-  const openPlanner = () => openTab("planejar");
 
   const { activeTrip, demoMode, loading: tripsLoading, selectTrip } = useTrip();
   // Conta nova sem viagem: boas-vindas em vez da demo.
@@ -96,7 +103,7 @@ export default function App() {
     if ((activeTrip || welcome) && DEMO_ONLY_TABS.includes(tab)) setTab("home");
   }, [activeTrip, welcome, tab]);
 
-  const openCreateTrip = useCallback(() => { setViagensCreating(true); setShowViagens(true); }, []);
+  const openCreateTrip = useCallback(() => { setShowViagens(false); setShowNova(true); }, []);
 
   const handleTab = useCallback((t: Tab) => {
     if (t === "grupo") { setShowGrupo(true); return; }
@@ -130,15 +137,13 @@ export default function App() {
     </Routes>
   );
 
-  // Primeiro passo de todo usuário: de onde sai e para onde vai
-  if (!activeTrip && (!route || editRoute)) return (
-    <Onboarding
-      initial={route}
-      onDone={(r) => { setRoute(r); setEditRoute(false); setTab("home"); }}
+  // Primeiro passo de quem não tem viagem (ou pediu uma nova): rota, dias, amigos e estilo
+  if (showNova || (welcome && user)) return (
+    <NovaViagem
+      onClose={welcome ? () => selectTrip(DEMO_TRIP_ID) : () => setShowNova(false)}
+      onDone={() => { setShowNova(false); setTab("home"); window.scrollTo({ top: 0 }); }}
     />
   );
-
-  const isDemoTrip = !route || /rio de janeiro/i.test(route.destination.name);
 
   return (
     <>
@@ -160,7 +165,7 @@ export default function App() {
         onOpenPerfil={() => setShowPerfil(true)}
         onOpenGrupo={() => setShowGrupo(true)}
         onOpenComoVai={() => setShowComoVai(true)}
-        onOpenPlanejar={openPlanner}
+        onOpenVotacao={() => openTab("votacao")}
         onOpenFotos={() => openTab("fotos")}
         onOpenMemorias={() => openTab("memorias")}
         onOpenViagens={() => setShowViagens(true)}
@@ -170,44 +175,31 @@ export default function App() {
       {/* HOME — viagem real: cabeçalho + roteiro do grupo */}
       {tab === "home" && activeTrip && (
         <>
-          <TripHero trip={activeTrip} onInvite={() => setShowGrupo(true)} onBudget={() => setTab("orcamento")} />
-          <RoteiroViagem key={activeTrip.id} trip={activeTrip} />
+          <TripHero
+            trip={activeTrip}
+            onInvite={() => setShowGrupo(true)}
+            onBudget={() => setTab("orcamento")}
+            onChangeItinerary={() => setShowEstilo(true)}
+            onAskAI={() => setShowAjuste(true)}
+          />
+          <RoteiroViagem key={activeTrip.id} trip={activeTrip} onAskAI={() => setShowAjuste(true)} />
           <footer className="site-footer">TripFlow · {activeTrip.name}</footer>
         </>
-      )}
-
-      {tab === "home" && welcome && (
-        <BoasVindas
-          name={(user?.user_metadata?.full_name as string | undefined) ?? null}
-          onCreate={openCreateTrip}
-          onDemo={() => selectTrip(DEMO_TRIP_ID)}
-        />
       )}
 
       {/* HOME — viagem demo: Hero + Roteiro + Resumo */}
       {tab === "home" && !activeTrip && !welcome && (
         <>
           {user && <DemoAviso onCreate={openCreateTrip} />}
-          <Hero route={route!} onPlan={openPlanner} onChangeRoute={() => setEditRoute(true)} />
-          {isDemoTrip ? (
-            <>
-              <section id="itinerary" className="itinerary">
-                <h2 className="section-title">O roteiro</h2>
-                {DAYS.map((day, i) => (
-                  <DayBlock key={day.num} day={day} index={i} onPlaceClick={setActivePlace} />
-                ))}
-              </section>
-              <Resumo />
-            </>
-          ) : (
-            <div className="home-plan-cta">
-              <p>Ainda não tem roteiro para {route!.destination.name}. Escolha onde vai ficar e a gente sugere passeios, restaurantes e baladas.</p>
-              <button className="hero-plan" onClick={openPlanner}>Planejar agora</button>
-            </div>
-          )}
-          <footer className="site-footer">
-            TripFlow · {route!.origin.name} → {route!.destination.name}
-          </footer>
+          <Hero route={DEMO_ROUTE} onPlan={openCreateTrip} onChangeRoute={openCreateTrip} />
+          <section id="itinerary" className="itinerary">
+            <h2 className="section-title">O roteiro</h2>
+            {DAYS.map((day, i) => (
+              <DayBlock key={day.num} day={day} index={i} onPlaceClick={setActivePlace} />
+            ))}
+          </section>
+          <Resumo />
+          <footer className="site-footer">TripFlow · Cuiabá → Rio de Janeiro</footer>
         </>
       )}
 
@@ -215,7 +207,7 @@ export default function App() {
       {tab === "gastos"    && <div className="tab-page"><Gastos /></div>}
       {tab === "mapa"      && <div className="tab-page"><Mapa key={`mapa-${activeTrip?.id ?? "demo"}`} /></div>}
       {tab === "orcamento" && activeTrip && <div className="tab-page"><Orcamento trip={activeTrip} /></div>}
-      {tab === "planejar"  && route && <div className="tab-page"><Planejar destino={route.destination} /></div>}
+      {tab === "votacao"   && activeTrip && <Votacao key={activeTrip.id} trip={activeTrip} onOpenRoteiro={() => openTab("home")} />}
       {tab === "passagens" && <div className="tab-page"><Passagens key={activeTrip?.id ?? "demo"} /></div>}
       {!activeTrip && (
         <>
@@ -242,8 +234,8 @@ export default function App() {
       {showGrupo    && <Grupo  onClose={() => setShowGrupo(false)} onOpenViagens={() => setShowViagens(true)} />}
       {showViagens  && (
         <Viagens
-          startCreating={viagensCreating}
-          onClose={() => { setShowViagens(false); setViagensCreating(false); setTab("home"); }}
+          onCreateNew={openCreateTrip}
+          onClose={() => { setShowViagens(false); setTab("home"); }}
         />
       )}
       {showComoVai  && (
@@ -253,6 +245,12 @@ export default function App() {
           onOpenViagens={() => setShowViagens(true)}
         />
       )}
+      {showEstilo && activeTrip && (
+        <Sheet title="Mudar roteiro" onClose={() => setShowEstilo(false)}>
+          <EstiloRoteiro trip={activeTrip} replacing onDone={() => setShowEstilo(false)} />
+        </Sheet>
+      )}
+      {showAjuste && activeTrip && <AssistenteRoteiro trip={activeTrip} onClose={() => setShowAjuste(false)} />}
       {showAssistente && <Assistente onClose={() => setShowAssistente(false)} onOpenViagens={() => setShowViagens(true)} />}
     </>
   );

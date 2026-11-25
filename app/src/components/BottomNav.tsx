@@ -1,6 +1,6 @@
 import { Icon, type IconName } from "./Icon";
 
-export type Tab = "home" | "fotos" | "gastos" | "checklist" | "memorias" | "aovivo" | "mapa" | "passagens" | "grupo" | "planejar" | "orcamento";
+export type Tab = "home" | "fotos" | "gastos" | "checklist" | "memorias" | "aovivo" | "mapa" | "passagens" | "grupo" | "votacao" | "orcamento";
 
 type Item = { id: Tab; icon: IconName; label: string };
 

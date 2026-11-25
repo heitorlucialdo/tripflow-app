@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import { flightsRouter } from "./routes/flights.js";
 import { aiRouter } from "./routes/ai.js";
+import { itineraryRouter } from "./routes/itinerary.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { requireAuth } from "./middleware/auth.js";
 import { flightsConfigured } from "./services/serpapi-flights.js";
@@ -25,6 +26,7 @@ app.use(cors({
 // Fotos de nota fiscal chegam em base64; só esta rota aceita corpo grande (a Vercel limita a 4,5 MB),
 // e só depois de autenticar, para ninguém mandar 6 MB sem token.
 app.use("/ai/parse-expense", requireAuth, express.json({ limit: "4mb" }));
+app.use("/ai/itinerary", requireAuth, express.json({ limit: "4mb" }));
 app.use(express.json({ limit: "100kb" }));
 
 const limiter = rateLimit({
@@ -41,6 +43,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/flights", flightsRouter);
+app.use("/ai/itinerary", itineraryRouter);
 app.use("/ai", aiRouter);
 
 app.use(errorHandler);

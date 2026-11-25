@@ -20,12 +20,12 @@ Nunca invente dados da viagem: use as ferramentas. Sobre lugares, deixe claro qu
 
 // ─── Contexto da viagem ───────────────────────────────────────────────────────
 
-interface TripContext {
+export interface TripContext {
   trip: { id: string; name: string; origin: string; destination: string; startDate: Date; endDate: Date };
   members: { id: string; label: string }[];
 }
 
-async function loadTripContext(tripId: string, userId: string): Promise<TripContext | null> {
+export async function loadTripContext(tripId: string, userId: string): Promise<TripContext | null> {
   const membership = await prisma.tripMember.findUnique({
     where: { tripId_userId: { tripId, userId } },
     include: { trip: true },
@@ -45,9 +45,9 @@ async function loadTripContext(tripId: string, userId: string): Promise<TripCont
   };
 }
 
-const isoDay = (d: Date) => d.toISOString().slice(0, 10);
+export const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
-function tripDayList(trip: TripContext["trip"]): string[] {
+export function tripDayList(trip: TripContext["trip"]): string[] {
   const days: string[] = [];
   for (let d = new Date(trip.startDate); d <= trip.endDate; d.setUTCDate(d.getUTCDate() + 1)) days.push(isoDay(d));
   return days;
@@ -217,7 +217,7 @@ async function executeTool(name: string, rawArgs: string, ctx: TripContext, user
   return "Ferramenta desconhecida.";
 }
 
-function notConfigured(res: Response) {
+export function notConfigured(res: Response) {
   res.status(503).json({ error: "A IA não está configurada no servidor." });
 }
 

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Icon } from "../Icon";
+import { Icon, type IconName } from "../Icon";
+import type { ItemCategory } from "../../lib/api";
 import { useTripRows } from "../../hooks/useTripRows";
 import { supabase } from "../../lib/supabase";
 import { formatDay, tripDays, toDayString, type Trip } from "../../lib/trip-context";
@@ -15,6 +16,27 @@ export interface ItineraryItem {
   address: string | null;
   lat: number | null;
   lng: number | null;
+  category: ItemCategory;
+  cost_level: number;
+  duration_min: number | null;
+  image_url: string | null;
+}
+
+export const CATEGORY_INFO: Record<ItemCategory, { label: string; icon: IconName }> = {
+  passeio:     { label: "Passeio",     icon: "sun" },
+  restaurante: { label: "Restaurante", icon: "fork" },
+  bar:         { label: "Bar",         icon: "glass" },
+  balada:      { label: "Balada",      icon: "music" },
+  cafe:        { label: "Café",        icon: "coffee" },
+  transporte:  { label: "Transporte",  icon: "plane" },
+};
+
+export const costLabel = (c: number) => (c === 0 ? "Grátis" : "$".repeat(c));
+
+function duration(min: number | null): string | null {
+  if (!min) return null;
+  const h = Math.floor(min / 60), m = min % 60;
+  return h ? `${h}h${m ? String(m).padStart(2, "0") : ""}` : `${m}min`;
 }
 
 interface Place {
@@ -36,7 +58,7 @@ async function searchPlaces(query: string): Promise<Place[]> {
   return await res.json() as Place[];
 }
 
-export function RoteiroViagem({ trip }: { trip: Trip }) {
+export function RoteiroViagem({ trip, onAskAI }: { trip: Trip; onAskAI?: () => void }) {
   const days = useMemo(() => tripDays(trip), [trip]);
   const today = toDayString(new Date());
   const [day, setDay] = useState(days.includes(today) ? today : days[0]);
@@ -144,7 +166,10 @@ export function RoteiroViagem({ trip }: { trip: Trip }) {
       </div>
 
       {loading && <p className={styles.empty}>Carregando roteiro...</p>}
-      {!loading && items.length === 0 && !adding && (
+      {!loading && rows.length === 0 && onAskAI && (
+        <p className={styles.empty}>Ainda não tem roteiro. Toque em "Mudar roteiro" lá em cima e a IA monta todos os dias.</p>
+      )}
+      {!loading && rows.length > 0 && items.length === 0 && !adding && (
         <p className={styles.empty}>Nada planejado para este dia ainda. Qualquer pessoa do grupo pode adicionar.</p>
       )}
 
@@ -153,7 +178,15 @@ export function RoteiroViagem({ trip }: { trip: Trip }) {
           <li key={item.id} className={styles.item}>
             <div className={styles.itemMain}>
               <span className={styles.time}>{item.start_time ? item.start_time.slice(0, 5) : "--:--"}</span>
+              {item.image_url
+                ? <img className={styles.thumb} src={item.image_url} alt="" loading="lazy" />
+                : <span className={styles.thumb} data-cat={item.category}><Icon name={CATEGORY_INFO[item.category]?.icon ?? "pin"} size={20} /></span>}
               <div className={styles.itemText}>
+                <span className={styles.itemTags}>
+                  <b data-cat={item.category}>{CATEGORY_INFO[item.category]?.label ?? "Passeio"}</b>
+                  <span>{costLabel(item.cost_level)}</span>
+                  {duration(item.duration_min) && <span>{duration(item.duration_min)}</span>}
+                </span>
                 <span className={styles.itemTitle}>{item.title}</span>
                 {item.address && <span className={styles.itemMeta}>{item.address}</span>}
                 {item.notes && <span className={styles.itemNotes}>{item.notes}</span>}
@@ -216,9 +249,16 @@ export function RoteiroViagem({ trip }: { trip: Trip }) {
           </div>
         </form>
       ) : (
-        <button className={styles.addBtn} onClick={() => setAdding(true)}>
-          <Icon name="plus" size={18} /> Adicionar ao roteiro
-        </button>
+        <div className={styles.addRow}>
+          {onAskAI && (
+            <button className={styles.aiBtn} onClick={onAskAI}>
+              <Icon name="sparkle" size={18} /> Pedir à IA
+            </button>
+          )}
+          <button className={styles.addBtn} onClick={() => setAdding(true)}>
+            <Icon name="plus" size={18} /> Adicionar manual
+          </button>
+        </div>
       )}
 
       {error && <p className={styles.error}>{error}</p>}

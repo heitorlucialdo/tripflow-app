@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../hooks/useAuth";
-import { TripContext, DEMO_TRIP_ID, type NewTrip, type Trip, type TripMember } from "../lib/trip-context";
+import { TripContext, DEMO_TRIP_ID, TRIP_COLUMNS, type NewTrip, type Trip, type TripMember, type TripPatch } from "../lib/trip-context";
 
 // Só guarda qual viagem a pessoa estava vendo neste aparelho; os dados
 // da viagem em si ficam no Supabase.
@@ -35,7 +35,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     if (!user) { setTrips([]); setLoading(false); return; }
     const { data } = await supabase
       .from("trips")
-      .select("id, name, origin, destination, start_date, end_date, created_by")
+      .select(TRIP_COLUMNS)
       .order("start_date", { ascending: false });
     setTrips((data ?? []) as Trip[]);
     setLoading(false);
@@ -91,7 +91,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase
       .from("trips")
       .insert({ ...input, created_by: user.id })
-      .select("id, name, origin, destination, start_date, end_date, created_by")
+      .select(TRIP_COLUMNS)
       .single();
     if (error || !data) throw new Error("Não foi possível criar a viagem.");
     const trip = data as Trip;
@@ -100,11 +100,17 @@ export function TripProvider({ children }: { children: ReactNode }) {
     return trip;
   }, [user, selectTrip]);
 
+  const updateTrip = useCallback(async (id: string, patch: TripPatch) => {
+    const { error } = await supabase.from("trips").update(patch).eq("id", id);
+    if (error) throw new Error("Não foi possível salvar a viagem.");
+    setTrips(prev => prev.map(t => (t.id === id ? { ...t, ...patch } : t)));
+  }, []);
+
   const isAdmin = Boolean(user && members.some(m => m.user_id === user.id && m.role === "admin"));
 
   const value = useMemo(() => ({
-    trips, activeTrip, members, isAdmin, loading, demoMode, selectTrip, createTrip, reloadTrips,
-  }), [trips, activeTrip, members, isAdmin, loading, demoMode, selectTrip, createTrip, reloadTrips]);
+    trips, activeTrip, members, isAdmin, loading, demoMode, selectTrip, createTrip, updateTrip, reloadTrips,
+  }), [trips, activeTrip, members, isAdmin, loading, demoMode, selectTrip, createTrip, updateTrip, reloadTrips]);
 
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
 }

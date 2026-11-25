@@ -40,6 +40,13 @@ model Trip {
   startDate       DateTime @map("start_date") @db.Date
   endDate         DateTime @map("end_date") @db.Date
   coverImageUrl   String?  @map("cover_image_url")
+  originLat       Float?   @map("origin_lat")
+  originLng       Float?   @map("origin_lng")
+  destinationLat  Float?   @map("destination_lat")
+  destinationLng  Float?   @map("destination_lng")
+  lodging         String?
+  hoursPerDay     Int      @default(8) @map("hours_per_day") @db.SmallInt
+  tier            String?
   createdBy       String   @map("created_by") @db.Uuid
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -175,10 +182,16 @@ model ItineraryItem {
   address   String?
   lat       Float?
   lng       Float?
+  category    String    @default("passeio")
+  costLevel   Int       @default(1) @map("cost_level") @db.SmallInt
+  durationMin Int?      @map("duration_min") @db.SmallInt
+  imageUrl    String?   @map("image_url")
   createdBy String?   @map("created_by") @db.Uuid
   createdAt DateTime  @default(now()) @map("created_at")
 
-  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  trip  Trip            @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  votes ItineraryVote[] @relation("VoteItem")
+  altVotes ItineraryVote[] @relation("VoteAlt")
 
   @@map("itinerary_items")
 }
@@ -212,4 +225,20 @@ model BudgetItem {
   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   @@map("budget_items")
+}
+
+model ItineraryVote {
+  itemId    String   @map("item_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tripId    String   @map("trip_id") @db.Uuid
+  choice    String
+  altItemId String?  @map("alt_item_id") @db.Uuid
+  note      String?
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  item    ItineraryItem  @relation("VoteItem", fields: [itemId], references: [id], onDelete: Cascade)
+  altItem ItineraryItem? @relation("VoteAlt", fields: [altItemId], references: [id], onDelete: SetNull)
+
+  @@id([itemId, userId])
+  @@map("itinerary_votes")
 }

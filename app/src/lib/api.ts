@@ -179,3 +179,67 @@ export async function parseExpense(tripId: string, input: { text?: string; image
   const data = await res.json() as { data: ExpenseDraft };
   return data.data;
 }
+
+export type ItemCategory = "passeio" | "restaurante" | "bar" | "balada" | "cafe" | "transporte";
+
+export interface PlaceCandidate {
+  name: string;
+  category: ItemCategory;
+  cost: number;
+  lat: number;
+  lng: number;
+  address?: string;
+  image?: string;
+}
+
+export interface ItemDraft {
+  day: string;
+  title: string;
+  startTime: string | null;
+  category: ItemCategory;
+  costLevel: number;
+  durationMin: number;
+  notes: string | null;
+  address: string | null;
+  lat: number | null;
+  lng: number | null;
+  imageUrl: string | null;
+}
+
+export interface ItineraryOp {
+  type: "adicionar" | "trocar" | "remover";
+  item_id: string | null;
+  item: ItemDraft;
+}
+
+export async function generateItinerary(
+  tripId: string,
+  opts: { tier: "economico" | "medio" | "premium" | "personalizado"; notes?: string; candidates: PlaceCandidate[] },
+): Promise<number> {
+  const data = await request<{ data: { count: number } }>(
+    "/ai/itinerary/generate",
+    { method: "POST", body: JSON.stringify({ trip_id: tripId, ...opts }) },
+    "Não consegui montar o roteiro agora.",
+  );
+  return data.data.count;
+}
+
+export async function editItinerary(
+  tripId: string,
+  input: { text?: string; image?: string; candidates: PlaceCandidate[] },
+): Promise<{ reply: string; ops: ItineraryOp[] }> {
+  const data = await request<{ data: { reply: string; ops: ItineraryOp[] } }>(
+    "/ai/itinerary/edit",
+    { method: "POST", body: JSON.stringify({ trip_id: tripId, ...input }) },
+    "A IA não respondeu agora.",
+  );
+  return data.data;
+}
+
+export async function applyItineraryOps(tripId: string, ops: ItineraryOp[]): Promise<void> {
+  await request<{ data: { ok: boolean } }>(
+    "/ai/itinerary/apply",
+    { method: "POST", body: JSON.stringify({ trip_id: tripId, ops }) },
+    "Não consegui aplicar as mudanças.",
+  );
+}

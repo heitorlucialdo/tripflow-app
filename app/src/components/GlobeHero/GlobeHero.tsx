@@ -20,6 +20,41 @@ function latLonToVec3(lat: number, lon: number, radius: number): THREE.Vector3 {
 }
 
 const GLOBE_R = 1;
+const FLIGHT_MS = 6000;
+
+// Ponto redondo com borda suave para a rota pontilhada
+function dotTexture(): THREE.Texture {
+  const c = document.createElement("canvas");
+  c.width = c.height = 32;
+  const g = c.getContext("2d");
+  if (g) {
+    const grad = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+    grad.addColorStop(0, "rgba(255,255,255,1)");
+    grad.addColorStop(0.55, "rgba(255,255,255,0.9)");
+    grad.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 32, 32);
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+// Silhueta de avião apontando para cima; o sprite gira conforme a direção do voo
+function planeTexture(): THREE.Texture {
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const g = c.getContext("2d");
+  if (g) {
+    g.translate(64, 64);
+    g.shadowColor = "rgba(61,217,255,0.9)";
+    g.shadowBlur = 14;
+    g.fillStyle = "#ffffff";
+    const p = new Path2D("M0 -46 C5 -46 7 -40 7 -32 L7 -10 L44 12 L44 20 L7 10 L7 30 L18 38 L18 44 L0 39 L-18 44 L-18 38 L-7 30 L-7 10 L-44 20 L-44 12 L-7 -10 L-7 -32 C-7 -40 -5 -46 0 -46 Z");
+    g.fill(p);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
 
 export interface GlobePoint {
   lat: number;
@@ -121,12 +156,12 @@ export default function GlobeHero({ from, to }: Props) {
     const markerGeo = new THREE.SphereGeometry(0.022, 16, 16);
 
     const cuiabaPos  = latLonToVec3(from.lat, from.lng, GLOBE_R + 0.01);
-    const cuiabaMesh = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffd700 }));
+    const cuiabaMesh = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0x3dd9ff }));
     cuiabaMesh.position.copy(cuiabaPos);
     globeGroup.add(cuiabaMesh);
 
     const rioPos  = latLonToVec3(to.lat, to.lng, GLOBE_R + 0.01);
-    const rioMesh = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xff4444 }));
+    const rioMesh = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
     rioMesh.position.copy(rioPos);
     globeGroup.add(rioMesh);
 
@@ -143,19 +178,39 @@ export default function GlobeHero({ from, to }: Props) {
     const tilt = (midLat * Math.PI) / 180;
     camera.position.set(0, 3 * Math.sin(tilt), 3 * Math.cos(tilt));
     camera.lookAt(0, 0, 0);
-    const curve        = new THREE.QuadraticBezierCurve3(cuiabaPos.clone(), controlPoint, rioPos.clone());
-    const arcPoints    = curve.getPoints(100);
+    const curve = new THREE.QuadraticBezierCurve3(cuiabaPos.clone(), controlPoint, rioPos.clone());
 
-    const arcGeo  = new THREE.BufferGeometry().setFromPoints(arcPoints);
-    const arcMat  = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.8, transparent: true });
-    const arcLine = new THREE.Line(arcGeo, arcMat);
+    // ── Rota pontilhada azul: pontos fixos cujo brilho acompanha o avião ──
+    const DOTS = 90;
+    const dotPositions = new Float32Array(DOTS * 3);
+    const dotColors    = new Float32Array(DOTS * 3);
+    for (let i = 0; i < DOTS; i++) {
+      const p = curve.getPoint(i / (DOTS - 1));
+      dotPositions.set([p.x, p.y, p.z], i * 3);
+    }
+    const arcGeo = new THREE.BufferGeometry();
+    arcGeo.setAttribute("position", new THREE.BufferAttribute(dotPositions, 3));
+    arcGeo.setAttribute("color", new THREE.BufferAttribute(dotColors, 3));
+    const arcMat = new THREE.PointsMaterial({
+      size: 0.022,
+      vertexColors: true,
+      transparent: true,
+      depthWrite: false,
+      map: dotTexture(),
+      alphaTest: 0.05,
+    });
+    const arcLine = new THREE.Points(arcGeo, arcMat);
     globeGroup.add(arcLine);
 
-    // ── Plane dot (in group) ──
-    const planeMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.018, 12, 12),
-      new THREE.MeshBasicMaterial({ color: 0xffd700 }),
-    );
+    const SKY   = new THREE.Color(0x3dd9ff);
+    const DIM   = new THREE.Color(0x1f7bff).multiplyScalar(0.55);
+    const tmpColor = new THREE.Color();
+
+    // ── Mini avião: sprite sempre de frente, girado na direção do voo ──
+    const planeTex  = planeTexture();
+    const planeMat  = new THREE.SpriteMaterial({ map: planeTex, transparent: true, depthWrite: false });
+    const planeMesh = new THREE.Sprite(planeMat);
+    planeMesh.scale.setScalar(0.12);
     globeGroup.add(planeMesh);
 
     // ── OrbitControls ──
@@ -232,14 +287,33 @@ export default function GlobeHero({ from, to }: Props) {
       if (autoRotate.current) globeGroup.rotation.y += 0.001;
 
       // Pulse markers
-      const pulse = 1 + 0.25 * Math.sin(Date.now() * 0.003);
+      const pulse = 1 + 0.35 * Math.sin(performance.now() * 0.004);
       cuiabaMesh.scale.setScalar(pulse);
       rioMesh.scale.setScalar(pulse);
 
-      // Animate plane along arc (arcPoints are in local group space)
-      const t   = (Date.now() * 0.00005) % 1;
-      const idx = Math.floor(t * 100);
-      planeMesh.position.copy(arcPoints[idx]);
+      // Avião sempre da origem ao destino; pausa curta no destino antes de recomeçar
+      const cycle = (performance.now() % FLIGHT_MS) / FLIGHT_MS;
+      const t = Math.min(1, cycle / 0.85);
+      const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      planeMesh.position.copy(curve.getPoint(eased));
+
+      // Rastro: pontos já percorridos acesos, os à frente apagados
+      for (let i = 0; i < DOTS; i++) {
+        const d = i / (DOTS - 1);
+        const behind = eased - d;
+        const k = behind >= 0 ? Math.max(0.35, 1 - behind * 1.2) : 0.25;
+        tmpColor.copy(DIM).lerp(SKY, k);
+        dotColors[i * 3] = tmpColor.r; dotColors[i * 3 + 1] = tmpColor.g; dotColors[i * 3 + 2] = tmpColor.b;
+      }
+      (arcGeo.getAttribute("color") as THREE.BufferAttribute).needsUpdate = true;
+
+      // Direção na tela: projeta um ponto um pouco à frente e gira o sprite para ele
+      const ahead = curve.getPoint(Math.min(1, eased + 0.01));
+      const here  = planeMesh.position.clone();
+      globeGroup.localToWorld(here).project(camera);
+      globeGroup.localToWorld(ahead).project(camera);
+      planeMat.rotation = Math.atan2(ahead.y - here.y, ahead.x - here.x) - Math.PI / 2;
+      planeMat.opacity = t >= 1 ? Math.max(0, 1 - (cycle - 0.85) / 0.15) : Math.min(1, t * 8);
 
       // Backface culling — getWorldPosition converts local → world space
       cuiabaMesh.getWorldPosition(vec3);
@@ -275,7 +349,8 @@ export default function GlobeHero({ from, to }: Props) {
       globeGeo.dispose(); globeMat.dispose();
       atmoGeo.dispose();  atmoMat.dispose();
       starGeo.dispose();  starMat.dispose();
-      arcGeo.dispose();   arcMat.dispose();
+      arcGeo.dispose();   arcMat.dispose(); arcMat.map?.dispose();
+      planeMat.dispose(); planeTex.dispose();
       if (wrapper.contains(renderer.domElement)) wrapper.removeChild(renderer.domElement);
     };
   }, [from.lat, from.lng, to.lat, to.lng]);
